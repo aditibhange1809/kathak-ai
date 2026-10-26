@@ -1,0 +1,38 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Model caches (HuggingFace, CTranslate2, Whisper)
+.cache/
+hf_cache/
+
+# Large audio recordings (keep sample demo files in data/raw if desired, or ignore large recordings)
+*.mp3
+*.flac
+*.m4a
+*.ogg
+# data/raw/*.wav  # Uncomment if you want to exclude local wav files from Git
