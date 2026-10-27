@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kathak AI — Dance Intelligence Platform</title>
+  <meta name="description" content="AI-powered Tala rhythm tracking, bol recognition, and performance evaluation for Indian Classical Kathak Dance." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0d14;
+      --surface:   #111622;
+      --card:      #161d2e;
+      --border:    #252d42;
+      --accent:    #7c6af7;
+      --accent2:   #e9a84c;
+      --green:     #2a9d8f;
+      --red:       #e76f51;
+      --blue:      #457b9d;
+      --text:      #e8eaf0;
+      --muted:     #8892a4;
+      --radius:    14px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0a0d14 0%, #12103a 50%, #0a1628 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 24px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 60% 0%, rgba(124,106,247,.18) 0%, transparent 65%),
+                  radial-gradient(ellipse at 20% 100%, rgba(233,168,76,.1) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 30%, #a99ff7 70%, #e9a84c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .hero .subtitle {
+      color: var(--muted);
+      font-size: 1.05rem;
+      font-weight: 400;
+      max-width: 580px;
+      margin: 0 auto 8px;
+    }
+    .pillars-badge {
+      display: inline-flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 18px;
+    }
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .badge-purple { background: rgba(124,106,247,.2); color: #a99ff7; border: 1px solid rgba(124,106,247,.3); }
+    .badge-gold   { background: rgba(233,168,76,.2);  color: #e9c46a; border: 1px solid rgba(233,168,76,.3); }
+    .badge-teal   { background: rgba(42,157,143,.2);  color: #4cc9b8; border: 1px solid rgba(42,157,143,.3); }
+    .badge-orange { background: rgba(231,111,81,.2);  color: #f4a261; border: 1px solid rgba(231,111,81,.3); }
+
+    /* ── Main Layout ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+    @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } .grid-4 { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 480px) { .grid-4 { grid-template-columns: 1fr; } }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Upload Zone ── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .25s, background .25s;
+      background: rgba(124,106,247,.03);
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(124,106,247,.07);
+    }
+    .upload-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 2.8rem; margin-bottom: 12px; display: block; }
+    .upload-zone h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; }
+    .upload-zone p  { color: var(--muted); font-size: 0.88rem; }
+
+    /* ── Library ── */
+    .library-list {
+      display: flex; flex-direction: column; gap: 8px; max-height: 240px;
+      overflow-y: auto;
+    }
+    .library-list::-webkit-scrollbar { width: 4px; }
+    .library-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .library-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .library-item:hover { border-color: var(--accent); background: rgba(124,106,247,.06); }
+    .library-item .name { font-size: 0.9rem; font-weight: 500; }
+    .library-item .size { font-size: 0.75rem; color: var(--muted); }
+    .library-item audio { height: 28px; border-radius: 6px; }
+
+    /* ── Analyze Button ── */
+    .btn-analyze {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent) 0%, #5c4fdf 100%);
+      color: #fff;
+      letter-spacing: 0.5px;
+      transition: opacity .2s, transform .15s;
+      box-shadow: 0 4px 20px rgba(124,106,247,.35);
+    }
+    .btn-analyze:hover { opacity: .92; transform: translateY(-1px); }
+    .btn-analyze:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    /* ── Loader ── */
+    .loader {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 48px;
+      text-align: center;
+    }
+    .loader.visible { display: flex; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-stages { display: flex; flex-direction: column; gap: 8px; }
+    .loader-stage {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; color: var(--muted); transition: color .3s;
+    }
+    .loader-stage.active { color: var(--accent); font-weight: 500; }
+    .loader-stage.done { color: var(--green); }
+    .stage-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+    /* ── Results ── */
+    #results { display: none; }
+    #results.visible { display: block; }
+
+    /* ── Grade Badge ── */
+    .grade-banner {
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: linear-gradient(135deg, #12103a 0%, #0e1a2d 100%);
+      border: 1px solid rgba(124,106,247,.3);
+      margin-bottom: 20px;
+    }
+    .grade-left h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    .grade-left p  { color: var(--muted); font-size: 0.9rem; }
+    .grade-circle {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: conic-gradient(var(--accent) calc(var(--pct)*3.6deg), var(--surface) 0);
+      padding: 3px;
+    }
+    .grade-inner {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .grade-letter { font-size: 1.8rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .grade-score  { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Pillar Cards ── */
+    .pillar-card {
+      border-radius: var(--radius);
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 10px;
+      transition: transform .2s;
+    }
+    .pillar-card:hover { transform: translateY(-2px); }
+    .pillar-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+    .pillar-val   { font-size: 1.6rem; font-weight: 700; }
+    .pillar-bar   { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .pillar-fill  { height: 100%; border-radius: 3px; transition: width .6s ease; }
+
+    /* ── Tala Ring ── */
+    .tala-info { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .tala-chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Matra Grid ── */
+    .matra-grid {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 4px;
+      margin-top: 8px;
+    }
+    @media (max-width: 640px) { .matra-grid { grid-template-columns: repeat(8,1fr); } }
+    .matra-cell {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 0.55rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--surface);
+      transition: transform .2s;
+      cursor: default;
+    }
+    .matra-cell:hover { transform: scale(1.15); z-index: 2; }
+    .matra-cell.sam    { background: rgba(42,157,143,.25);  border-color: var(--green); color: #4cc9b8; }
+    .matra-cell.taali  { background: rgba(231,111,81,.2);   border-color: var(--red);   color: #f4a261; }
+    .matra-cell.khali  { background: rgba(69,123,157,.2);   border-color: var(--blue);  color: #7bb9d8; }
+    .matra-num { font-size: 0.7rem; font-weight: 700; }
+    .matra-bol { font-size: 0.5rem; margin-top: 2px; }
+
+    /* ── Bols ── */
+    .bol-tokens {
+      display: flex; flex-wrap: wrap; gap: 7px;
+    }
+    .bol-token {
+      padding: 5px 11px;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: rgba(124,106,247,.12);
+      border: 1px solid rgba(124,106,247,.25);
+      color: #c4baf9;
+      animation: pop-in .3s ease both;
+    }
+    @keyframes pop-in { from { opacity:0; transform:scale(.8); } to { opacity:1; transform:scale(1); } }
+
+    /* ── Feedback ── */
+    .feedback-list { display: flex; flex-direction: column; gap: 10px; }
+    .feedback-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px;
+      border-radius: 9px;
+      font-size: 0.87rem;
+      background: var(--surface);
+      border-left: 3px solid var(--muted);
+    }
+    .feedback-item.EXCELLENT { border-color: var(--green);  background: rgba(42,157,143,.07); }
+    .feedback-item.INFO      { border-color: var(--blue);   background: rgba(69,123,157,.07); }
+    .feedback-item.WARNING   { border-color: var(--accent2);background: rgba(233,168,76,.07); }
+    .feedback-item.CRITICAL  { border-color: var(--red);    background: rgba(231,111,81,.07); }
+    .feedback-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+    .feedback-cat  { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+
+    /* ── Plots ── */
+    .plot-img {
+      width: 100%; border-radius: 10px;
+      border: 1px solid var(--border);
+      display: block;
+      margin-top: 6px;
+    }
+
+    /* ── Transcript ── */
+    .transcript-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 14px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    /* ── Section header ── */
+    .section-hdr {
+      font-size: 1.1rem; font-weight: 700;
+      margin: 32px 0 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-hdr::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    /* ── Processing time ── */
+    .proc-time {
+      text-align: center; color: var(--muted);
+      font-size: 0.78rem; margin-top: 8px;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Hero ─────────────────────────────────────── -->
+<header class="hero">
+  <h1>🩰 Kathak AI</h1>
+  <p class="subtitle">
+    AI-powered Tala rhythm tracking, bol recognition, and performance evaluation
+    for Indian Classical Dance
+  </p>
+  <div class="pillars-badge">
+    <span class="badge badge-teal">Stage 1: Mel Spectrogram & MFCCs</span>
+    <span class="badge badge-purple">Stage 2: Teental Matra Grid</span>
+    <span class="badge badge-gold">Stage 3: Kathak Bol Recognition</span>
+    <span class="badge badge-orange">Stage 4: Guru Evaluation</span>
+  </div>
+</header>
+
+<!-- ── Main ──────────────────────────────────────── -->
+<main class="container">
+
+  <!-- Upload + Library -->
+  <div class="grid-2">
+
+    <!-- Upload Zone -->
+    <div class="card">
+      <div class="card-title">Upload Recording</div>
+      <div class="upload-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".wav,.mp3,.flac" />
+        <span class="upload-icon">🎵</span>
+        <h2>Drop your Kathak audio here</h2>
+        <p>or click to select a WAV / MP3 / FLAC file</p>
+      </div>
+      <p id="selectedFile" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></p>
+      <button class="btn-analyze" id="analyzeBtn" disabled>Analyze Performance</button>
+    </div>
+
+    <!-- Sample Library -->
+    <div class="card">
+      <div class="card-title">Sample Library</div>
+      <div class="library-list" id="libraryList">
+        <div style="color:var(--muted);font-size:.85rem;">Loading…</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-stages">
+      <div class="loader-stage" id="s1"><div class="stage-dot"></div>Stage 1 — Extracting spectral features…</div>
+      <div class="loader-stage" id="s2"><div class="stage-dot"></div>Stage 2 — Tracking Tala & 16-Matra grid…</div>
+      <div class="loader-stage" id="s3"><div class="stage-dot"></div>Stage 3 — Transcribing Kathak bols (Whisper)…</div>
+      <div class="loader-stage" id="s4"><div class="stage-dot"></div>Stage 4 — Evaluating performance…</div>
+    </div>
+  </div>
+
+  <!-- Results Panel -->
+  <div id="results">
+
+    <!-- ── Grade Banner ── -->
+    <div class="grade-banner" id="gradeBanner">
+      <div class="grade-left">
+        <h2 id="gradeTitle">—</h2>
+        <p  id="gradeSubtitle">—</p>
+      </div>
+      <div class="grade-circle" id="gradeCircle" style="--pct:0">
+        <div class="grade-inner">
+          <div class="grade-letter" id="gradeLetter">—</div>
+          <div class="grade-score"  id="gradeScore">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4 Pillars ── -->
+    <div class="section-hdr">⚖️ Four Pillars of Performance</div>
+    <div class="grid-4" id="pillarsGrid"></div>
+
+    <!-- ── Tala Info ── -->
+    <div class="section-hdr">🥁 Tala & Rhythm Analysis</div>
+    <div class="card">
+      <div class="tala-info" id="talaChips"></div>
+      <div class="card-title" style="margin-top:8px;">16-Matra Teental Structure</div>
+      <div class="matra-grid" id="matraGrid"></div>
+    </div>
+
+    <!-- ── Bols ── -->
+    <div class="section-hdr">🗣️ Detected Kathak Bols</div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:8px;">Normalized Tokens — <span id="bolCount" style="color:var(--accent)"></span></div>
+      <div class="bol-tokens" id="bolTokens"></div>
+      <div class="card-title" style="margin-top:16px;">Raw ASR Transcript</div>
+      <div class="transcript-box" id="transcript"></div>
+    </div>
+
+    <!-- ── Feedback ── -->
+    <div class="section-hdr">📋 Guru Diagnostics & Critique</div>
+    <div class="feedback-list" id="feedbackList"></div>
+
+    <!-- ── Plots ── -->
+    <div class="section-hdr">📊 Visual Diagnostics</div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">Mel Spectrogram & MFCCs</div>   <img id="plotFeatures" class="plot-img" /></div>
+      <div class="card"><div class="card-title">Teental Grid Alignment</div>     <img id="plotTala"     class="plot-img" /></div>
+    </div>
+    <div class="grid-2" style="margin-top:20px;">
+      <div class="card"><div class="card-title">Bol Recognition Timeline</div>   <img id="plotBols"     class="plot-img" /></div>
+      <div class="card"><div class="card-title">Performance Report Card</div>    <img id="plotReport"   class="plot-img" /></div>
+    </div>
+
+    <p class="proc-time" id="procTime"></p>
+
+  </div><!-- /results -->
+
+</main>
+
+<script>
+// ── Constants ────────────────────────────────────────────────────────────────
+const TEENTAL_BOLS = [
+  'Dha','Dhin','Dhin','Dha',
+  'Dha','Dhin','Dhin','Dha',
+  'Dha','Tin','Tin','Ta',
+  'Ta','Dhin','Dhin','Dha'
+];
+const MATRA_ACTIONS = {1:'sam',5:'taali',9:'khali',13:'taali'};
+
+const PILLAR_META = [
+  { key:'laya_stability',  label:'Laya Sthirata', sub:'Tempo Stability',   color:'#2a9d8f' },
+  { key:'sam_precision',   label:'Sam Precision',  sub:'Beat 1 Accuracy',   color:'#e9a84c' },
+  { key:'matra_synchrony', label:'Matra Synchrony',sub:'Rhythmic Jitter',   color:'#7c6af7' },
+  { key:'bol_accuracy',    label:'Bol Shuddhata',  sub:'Syllable Accuracy', color:'#e76f51' },
+];
+
+const FEEDBACK_ICONS = {
+  EXCELLENT:'✅', INFO:'ℹ️', WARNING:'⚠️', CRITICAL:'🚨'
+};
+
+// ── Refs ─────────────────────────────────────────────────────────────────────
+const dropZone   = document.getElementById('dropZone');
+const fileInput  = document.getElementById('fileInput');
+const selectedFile= document.getElementById('selectedFile');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const loader     = document.getElementById('loader');
+const results    = document.getElementById('results');
+
+let selectedFileObj = null;
+
+// ── Library ───────────────────────────────────────────────────────────────────
+async function loadLibrary() {
+  try {
+    const r = await fetch('/library');
+    const data = await r.json();
+    const list = document.getElementById('libraryList');
+    if (!data.recordings.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">No recordings found in data/raw/</div>';
+      return;
+    }
+    list.innerHTML = '';
+    data.recordings.forEach(rec => {
+      const item = document.createElement('div');
+      item.className = 'library-item';
+      item.innerHTML = `
+        <div>
+          <div class="name">🎵 ${rec.filename}</div>
+          <div class="size">${rec.size_kb} KB</div>
+        </div>
+        <audio controls src="${rec.url}"></audio>
+      `;
+      // Click on item to load from server
+      item.querySelector('.name').addEventListener('click', () => loadLibraryFile(rec.filename));
+      list.appendChild(item);
+    });
+  } catch (e) {
+    console.error('Library load failed', e);
+  }
+}
+
+async function loadLibraryFile(filename) {
+  const res  = await fetch(`/audio/${filename}`);
+  const blob = await res.blob();
+  selectedFileObj = new File([blob], filename, { type: 'audio/wav' });
+  selectedFile.textContent = `Selected: ${filename}`;
+  analyzeBtn.disabled = false;
+}
+
+// ── File Input ────────────────────────────────────────────────────────────────
+fileInput.addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) {
+    selectedFileObj = f;
+    selectedFile.textContent = `Selected: ${f.name}`;
+    analyzeBtn.disabled = false;
+  }
+});
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) { selectedFileObj = f; selectedFile.textContent = `Selected: ${f.name}`; analyzeBtn.disabled = false; }
+});
+
+// ── Loader animation ──────────────────────────────────────────────────────────
+function setStage(idx) {
+  ['s1','s2','s3','s4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done');
+    if (i < idx) el.classList.add('done');
+    else if (i === idx) el.classList.add('active');
+  });
+}
+
+// ── Analyze ───────────────────────────────────────────────────────────────────
+analyzeBtn.addEventListener('click', async () => {
+  if (!selectedFileObj) return;
+
+  // Reset
+  analyzeBtn.disabled = true;
+  results.classList.remove('visible');
+  loader.classList.add('visible');
+  setStage(0);
+
+  const stageTimers = [
+    setTimeout(()=>setStage(1), 2000),
+    setTimeout(()=>setStage(2), 4000),
+    setTimeout(()=>setStage(3), 6000),
+  ];
+
+  try {
+    const form = new FormData();
+    form.append('file', selectedFileObj);
+    const res  = await fetch('/analyze', { method:'POST', body: form });
+    stageTimers.forEach(clearTimeout);
+    setStage(4);
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Analysis failed');
+    }
+
+    const data = await res.json();
+    loader.classList.remove('visible');
+    renderResults(data);
+  } catch (e) {
+    loader.classList.remove('visible');
+    alert('Error: ' + e.message);
+  } finally {
+    analyzeBtn.disabled = false;
+  }
+});
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+function renderResults(d) {
+  const sc  = d.scorecard;
+  const tal = d.tala;
+  const bol = d.bols;
+
+  // Grade banner
+  document.getElementById('gradeTitle').textContent    = sc.title_award;
+  document.getElementById('gradeSubtitle').textContent = `${d.filename} · ${d.audio.duration_sec}s · ${tal.tempo_bpm} BPM (${tal.laya_category})`;
+  document.getElementById('gradeLetter').textContent   = sc.letter_grade;
+  document.getElementById('gradeScore').textContent    = `${sc.composite_score}%`;
+  document.getElementById('gradeCircle').style.setProperty('--pct', sc.composite_score);
+
+  // Pillars
+  const pg = document.getElementById('pillarsGrid');
+  pg.innerHTML = '';
+  PILLAR_META.forEach(m => {
+    const val = sc.pillars[m.key] ?? 0;
+    pg.innerHTML += `
+      <div class="pillar-card">
+        <div class="pillar-label">${m.label}</div>
+        <div class="pillar-val" style="color:${m.color}">${val}%</div>
+        <div style="font-size:.72rem;color:var(--muted)">${m.sub}</div>
+        <div class="pillar-bar"><div class="pillar-fill" style="width:${val}%;background:${m.color}"></div></div>
+      </div>`;
+  });
+
+  // Tala chips
+  const chips = document.getElementById('talaChips');
+  chips.innerHTML = [
+    ['Tempo', `${tal.tempo_bpm} BPM`],
+    ['Laya', tal.laya_category],
+    ['Matched Matras', `${tal.matched_matras} / ${tal.total_matras}`],
+    ['Mean Error', `${tal.mean_abs_error_ms} ms`],
+    ['Jitter', `${tal.timing_jitter_ms} ms`],
+    tal.sam_offset_ms !== null ? ['Sam Offset', `${tal.sam_offset_ms > 0 ? '+' : ''}${tal.sam_offset_ms} ms`] : null,
+  ].filter(Boolean).map(([l,v]) => `<div class="tala-chip"><span style="color:var(--muted);font-size:.7rem">${l} </span>${v}</div>`).join('');
+
+  // Matra grid
+  const mg = document.getElementById('matraGrid');
+  mg.innerHTML = '';
+  for (let i = 1; i <= 16; i++) {
+    const cls = MATRA_ACTIONS[i] ?? '';
+    const bol_nm = TEENTAL_BOLS[i-1];
+    mg.innerHTML += `<div class="matra-cell ${cls}" title="Matra ${i}: ${bol_nm}"><div class="matra-num">${i}</div><div class="matra-bol">${bol_nm}</div></div>`;
+  }
+
+  // Bols
+  document.getElementById('bolCount').textContent = `${bol.detected_count} bols detected · matched ${bol.matched_repertoire} (${bol.similarity_score}%)`;
+  const bt = document.getElementById('bolTokens');
+  bt.innerHTML = '';
+  (bol.tokens || []).slice(0, 80).forEach((t,i) => {
+    const span = document.createElement('span');
+    span.className = 'bol-token';
+    span.style.animationDelay = `${i * 0.025}s`;
+    span.textContent = t;
+    bt.appendChild(span);
+  });
+  document.getElementById('transcript').textContent = bol.raw_transcript || '—';
+
+  // Feedback
+  const fl = document.getElementById('feedbackList');
+  fl.innerHTML = '';
+  sc.feedback.forEach(f => {
+    fl.innerHTML += `
+      <div class="feedback-item ${f.severity}">
+        <span class="feedback-icon">${FEEDBACK_ICONS[f.severity] || '•'}</span>
+        <div>
+          <div class="feedback-cat">${f.category}</div>
+          <div>${f.message}</div>
+        </div>
+      </div>`;
+  });
+
+  // Plots
+  const plots = d.plots;
+  if (plots.features) document.getElementById('plotFeatures').src = `data:image/png;base64,${plots.features}`;
+  if (plots.tala)     document.getElementById('plotTala').src     = `data:image/png;base64,${plots.tala}`;
+  if (plots.bols)     document.getElementById('plotBols').src     = `data:image/png;base64,${plots.bols}`;
+  if (plots.report)   document.getElementById('plotReport').src   = `data:image/png;base64,${plots.report}`;
+
+  // Proc time
+  document.getElementById('procTime').textContent = `Analysis completed in ${d.processing_time_sec}s`;
+
+  // Show
+  results.classList.add('visible');
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadLibrary();
+</script>
+</body>
+</html>
