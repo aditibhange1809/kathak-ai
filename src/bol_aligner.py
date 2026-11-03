@@ -18,6 +18,10 @@ from typing import Dict, List, Optional, Tuple
 import unicodedata
 
 from faster_whisper import WhisperModel
+
+# Use the tiny model with int8 compute type to stay safely under Render's 512MB RAM limit
+model_size = "tiny"
+model = WhisperModel(model_size, device="cpu", compute_type="int8")
 import librosa
 import matplotlib.pyplot as plt
 import numpy as np
