@@ -144,7 +144,21 @@ def run_full_pipeline(audio_file_path: Path):
     print(f"  2. Teental Grid Alignment:   outputs/{tala_plot.name}")
     print(f"  3. Bol Recognition Timeline: outputs/{bol_plot.name}")
     print(f"  4. Executive Scorecard:      outputs/{report_plot.name}")
+    
     print("=" * 65 + "\n")
+
+    return {
+        "features_plot": feat_plot,
+        "tala_plot": tala_plot,
+        "bol_plot": bol_plot,
+        "report_plot": report_plot,
+        "scorecard": scorecard,
+        "matched_composition": best_comp,
+        "transcript": raw_transcript,
+        "tokens": tokens,
+        "tala_metrics": tala_metrics,
+        "bol_alignment": bol_alignment,
+    }
 
 
 if __name__ == "__main__":
@@ -154,3 +168,7 @@ if __name__ == "__main__":
         if not target.is_absolute():
             target = PROJECT_ROOT / target
     run_full_pipeline(target)
+
+
+
+

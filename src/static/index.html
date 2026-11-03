@@ -1,31 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kathak AI — Dance Intelligence Platform</title>
-  <meta name="description" content="AI-powered Tala rhythm tracking, bol recognition, and performance evaluation for Indian Classical Kathak Dance." />
+  <meta name="description"
+    content="AI-powered Tala rhythm tracking, bol recognition, and performance evaluation for Indian Classical Kathak Dance." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #0a0d14;
-      --surface:   #111622;
-      --card:      #161d2e;
-      --border:    #252d42;
-      --accent:    #7c6af7;
-      --accent2:   #e9a84c;
-      --green:     #2a9d8f;
-      --red:       #e76f51;
-      --blue:      #457b9d;
-      --text:      #e8eaf0;
-      --muted:     #8892a4;
-      --radius:    14px;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html { scroll-behavior: smooth; }
+    :root {
+      --bg: #fdfbf7;
+      --surface: #ffffff;
+      --card: #fffdf9;
+      --border: #e6dfd5;
+      --accent: #b45309;
+      --accent-dark: #78350f;
+      --terracotta: #9a3412;
+      --green: #166534;
+      --red: #991b1b;
+      --blue: #1e40af;
+      --text: #292524;
+      --muted: #78716c;
+      --radius: 14px;
+      --shadow: 0 4px 12px -2px rgba(120, 53, 15, 0.06), 0 2px 6px -1px rgba(120, 53, 15, 0.04);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
@@ -33,143 +48,428 @@
       min-height: 100vh;
     }
 
-    /* ── Hero ── */
+    /* ── Screen Controller ── */
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* ── Compact Warm Hero ── */
     .hero {
-      background: linear-gradient(135deg, #0a0d14 0%, #12103a 50%, #0a1628 100%);
+      background: linear-gradient(135deg, #fef3c7 0%, #fae8ff 40%, #fdfbf7 100%);
       border-bottom: 1px solid var(--border);
-      padding: 48px 24px 36px;
+      padding: 32px 24px 24px;
       text-align: center;
       position: relative;
       overflow: hidden;
     }
-    .hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 60% 0%, rgba(124,106,247,.18) 0%, transparent 65%),
-                  radial-gradient(ellipse at 20% 100%, rgba(233,168,76,.1) 0%, transparent 55%);
-      pointer-events: none;
+
+    .hero-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
+
+    .hero-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent);
+      box-shadow: 0 2px 8px rgba(180, 83, 9, 0.2);
+    }
+
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
       font-weight: 800;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #fff 30%, #a99ff7 70%, #e9a84c 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+      color: var(--accent-dark);
+      margin-bottom: 4px;
     }
+
     .hero .subtitle {
       color: var(--muted);
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 400;
-      max-width: 580px;
-      margin: 0 auto 8px;
+      max-width: 540px;
+      margin: 0 auto;
     }
+
     .pillars-badge {
       display: inline-flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 18px;
+      margin-top: 14px;
     }
+
     .badge {
       padding: 4px 12px;
       border-radius: 20px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
-    .badge-purple { background: rgba(124,106,247,.2); color: #a99ff7; border: 1px solid rgba(124,106,247,.3); }
-    .badge-gold   { background: rgba(233,168,76,.2);  color: #e9c46a; border: 1px solid rgba(233,168,76,.3); }
-    .badge-teal   { background: rgba(42,157,143,.2);  color: #4cc9b8; border: 1px solid rgba(42,157,143,.3); }
-    .badge-orange { background: rgba(231,111,81,.2);  color: #f4a261; border: 1px solid rgba(231,111,81,.3); }
+
+    .badge-brown {
+      background: rgba(120, 53, 15, .1);
+      color: #78350f;
+      border: 1px solid rgba(120, 53, 15, .2);
+    }
+
+    .badge-amber {
+      background: rgba(180, 83, 9, .1);
+      color: #b45309;
+      border: 1px solid rgba(180, 83, 9, .2);
+    }
+
+    .badge-green {
+      background: rgba(22, 101, 52, .1);
+      color: #166534;
+      border: 1px solid rgba(22, 101, 52, .2);
+    }
+
+    .badge-terra {
+      background: rgba(154, 52, 18, .1);
+      color: #9a3412;
+      border: 1px solid rgba(154, 52, 18, .2);
+    }
 
     /* ── Main Layout ── */
-    .container { max-width: 1200px; margin: 0 auto; padding: 36px 24px 80px; }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 24px 64px;
+    }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
-    @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } .grid-4 { grid-template-columns: repeat(2,1fr); } }
-    @media (max-width: 480px) { .grid-4 { grid-template-columns: 1fr; } }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
 
     /* ── Card ── */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
     }
+
     .card-title {
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: 1px;
       color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     /* ── Upload Zone ── */
     .upload-zone {
-      border: 2px dashed var(--border);
+      border: 2px dashed #d6c9b8;
       border-radius: var(--radius);
-      padding: 48px 24px;
+      padding: 40px 24px;
       text-align: center;
       cursor: pointer;
       transition: border-color .25s, background .25s;
-      background: rgba(124,106,247,.03);
+      background: #faf6f0;
       position: relative;
     }
-    .upload-zone:hover, .upload-zone.drag-over {
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
       border-color: var(--accent);
-      background: rgba(124,106,247,.07);
+      background: rgba(180, 83, 9, .04);
     }
+
     .upload-zone input[type=file] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
     }
-    .upload-icon { font-size: 2.8rem; margin-bottom: 12px; display: block; }
-    .upload-zone h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; }
-    .upload-zone p  { color: var(--muted); font-size: 0.88rem; }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .upload-zone h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .upload-zone p {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* ── Recording Zone ── */
+    .record-zone {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      text-align: center;
+      background: #faf6f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .record-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 4px solid var(--border);
+      background: linear-gradient(135deg, #fef3c7, #fffdf9);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .3s ease;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(180, 83, 9, 0.12);
+    }
+
+    .record-btn:hover {
+      border-color: var(--red);
+      transform: scale(1.05);
+    }
+
+    .record-btn.recording {
+      border-color: var(--red);
+      background: linear-gradient(135deg, #fecaca, #fee2e2);
+      animation: pulse-record 1.5s ease-in-out infinite;
+    }
+
+    .record-btn-inner {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--red);
+      transition: all .3s ease;
+    }
+
+    .record-btn.recording .record-btn-inner {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+    }
+
+    @keyframes pulse-record {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(153, 27, 27, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 0 16px rgba(153, 27, 27, 0);
+      }
+    }
+
+    .record-timer {
+      font-size: 1.6rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--red);
+      display: none;
+    }
+
+    .record-timer.visible {
+      display: block;
+    }
+
+    .record-label {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .record-waveform {
+      width: 100%;
+      height: 48px;
+      display: none;
+    }
+
+    .record-waveform.visible {
+      display: block;
+    }
+
+    .record-preview {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .record-preview.visible {
+      display: flex;
+    }
+
+    .record-preview audio {
+      width: 100%;
+      height: 36px;
+      border-radius: 8px;
+    }
+
+    .record-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: all .2s;
+    }
+
+    .btn-sm:hover {
+      border-color: var(--accent);
+      background: #fef3c7;
+    }
+
+    .btn-sm.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .btn-sm.primary:hover {
+      opacity: .9;
+    }
 
     /* ── Library ── */
     .library-list {
-      display: flex; flex-direction: column; gap: 8px; max-height: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 240px;
       overflow-y: auto;
     }
-    .library-list::-webkit-scrollbar { width: 4px; }
-    .library-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .library-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .library-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
     .library-item {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 10px 14px;
-      background: var(--surface);
+      background: #faf6f0;
       border: 1px solid var(--border);
       border-radius: 8px;
       cursor: pointer;
       transition: border-color .2s, background .2s;
     }
-    .library-item:hover { border-color: var(--accent); background: rgba(124,106,247,.06); }
-    .library-item .name { font-size: 0.9rem; font-weight: 500; }
-    .library-item .size { font-size: 0.75rem; color: var(--muted); }
-    .library-item audio { height: 28px; border-radius: 6px; }
+
+    .library-item:hover {
+      border-color: var(--accent);
+      background: rgba(180, 83, 9, .04);
+    }
+
+    .library-item .name {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .library-item .size {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .library-item audio {
+      height: 28px;
+      border-radius: 6px;
+    }
 
     /* ── Analyze Button ── */
     .btn-analyze {
       width: 100%;
-      margin-top: 18px;
-      padding: 14px;
+      margin-top: 16px;
+      padding: 13px;
       border: none;
       border-radius: 10px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
-      background: linear-gradient(135deg, var(--accent) 0%, #5c4fdf 100%);
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
       color: #fff;
       letter-spacing: 0.5px;
       transition: opacity .2s, transform .15s;
-      box-shadow: 0 4px 20px rgba(124,106,247,.35);
+      box-shadow: 0 4px 14px rgba(180, 83, 9, 0.25);
     }
-    .btn-analyze:hover { opacity: .92; transform: translateY(-1px); }
-    .btn-analyze:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    .btn-analyze:hover {
+      opacity: .92;
+      transform: translateY(-1px);
+    }
+
+    .btn-analyze:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
 
     /* ── Loader ── */
     .loader {
@@ -177,167 +477,1163 @@
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      padding: 48px;
+      padding: 64px 24px;
       text-align: center;
     }
-    .loader.visible { display: flex; }
+
+    .loader.visible {
+      display: flex;
+    }
+
     .spinner {
-      width: 48px; height: 48px;
+      width: 48px;
+      height: 48px;
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-stages { display: flex; flex-direction: column; gap: 8px; }
-    .loader-stage {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 0.88rem; color: var(--muted); transition: color .3s;
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
-    .loader-stage.active { color: var(--accent); font-weight: 500; }
-    .loader-stage.done { color: var(--green); }
-    .stage-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 
-    /* ── Results ── */
-    #results { display: none; }
-    #results.visible { display: block; }
+    .loader-stages {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
 
-    /* ── Grade Badge ── */
+    .loader-stage {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      transition: color .3s;
+    }
+
+    .loader-stage.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .loader-stage.done {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .stage-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ── Navigation / Back Button ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--accent-dark);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow);
+      transition: background .2s, border-color .2s;
+    }
+
+    .btn-back:hover {
+      background: #faf6f0;
+      border-color: var(--accent);
+    }
+
+    /* ── Grade Banner ── */
     .grade-banner {
       border-radius: var(--radius);
-      padding: 28px 32px;
+      padding: 24px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 16px;
-      background: linear-gradient(135deg, #12103a 0%, #0e1a2d 100%);
-      border: 1px solid rgba(124,106,247,.3);
+      background: linear-gradient(135deg, #fef3c7 0%, #fae8ff 100%);
+      border: 1px solid rgba(180, 83, 9, 0.2);
       margin-bottom: 20px;
+      box-shadow: var(--shadow);
     }
-    .grade-left h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-    .grade-left p  { color: var(--muted); font-size: 0.9rem; }
+
+    .grade-left h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--accent-dark);
+    }
+
+    .grade-left p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
     .grade-circle {
-      width: 90px; height: 90px;
+      width: 84px;
+      height: 84px;
       border-radius: 50%;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: conic-gradient(var(--accent) calc(var(--pct)*3.6deg), var(--surface) 0);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: conic-gradient(var(--accent) calc(var(--pct)*3.6deg), #e6dfd5 0);
       padding: 3px;
     }
+
     .grade-inner {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
-      background: var(--bg);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-    .grade-letter { font-size: 1.8rem; font-weight: 800; color: var(--accent); line-height: 1; }
-    .grade-score  { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+    .grade-letter {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .grade-score {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 600;
+    }
 
     /* ── Pillar Cards ── */
     .pillar-card {
       border-radius: var(--radius);
-      padding: 18px;
+      padding: 16px;
       background: var(--card);
       border: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 10px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
       transition: transform .2s;
     }
-    .pillar-card:hover { transform: translateY(-2px); }
-    .pillar-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
-    .pillar-val   { font-size: 1.6rem; font-weight: 700; }
-    .pillar-bar   { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .pillar-fill  { height: 100%; border-radius: 3px; transition: width .6s ease; }
+
+    .pillar-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .pillar-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .pillar-val {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .pillar-bar {
+      height: 6px;
+      background: #faf6f0;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .pillar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .6s ease;
+    }
 
     /* ── Tala Ring ── */
-    .tala-info { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .tala-info {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
     .tala-chip {
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 0.8rem;
       font-weight: 500;
-      background: var(--surface);
+      background: #faf6f0;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    /* ── Tala Analysis & Integrated Playback ── */
+    .tala-header-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Audio Playback + Interactive Bol Slider in Tala Section ── */
+    .tala-player-box {
+      background: linear-gradient(145deg, #fffcf7 0%, #faf5ea 100%);
+      border: 1.5px solid #ebd9c2;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: inset 0 1px 3px rgba(120, 53, 15, 0.03);
+    }
+
+    .tala-player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tala-player-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .play-btn-tala {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: linear-gradient(135deg, #fef3c7, #fffdf9);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: var(--accent-dark);
+      transition: all .25s ease;
+      box-shadow: 0 3px 10px rgba(180, 83, 9, 0.2);
+      flex-shrink: 0;
+    }
+
+    .play-btn-tala:hover {
+      transform: scale(1.08);
+      background: #fef3c7;
+      box-shadow: 0 4px 14px rgba(180, 83, 9, 0.3);
+    }
+
+    .playback-time-badge {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      background: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .speed-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #faf6f0;
+      padding: 3px;
+      border-radius: 20px;
       border: 1px solid var(--border);
     }
 
-    /* ── Matra Grid ── */
-    .matra-grid {
-      display: grid;
-      grid-template-columns: repeat(16, 1fr);
-      gap: 4px;
-      margin-top: 8px;
-    }
-    @media (max-width: 640px) { .matra-grid { grid-template-columns: repeat(8,1fr); } }
-    .matra-cell {
-      aspect-ratio: 1;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      font-size: 0.55rem;
+    .speed-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--muted);
-      background: var(--surface);
-      transition: transform .2s;
-      cursor: default;
+      cursor: pointer;
+      transition: all .2s;
     }
-    .matra-cell:hover { transform: scale(1.15); z-index: 2; }
-    .matra-cell.sam    { background: rgba(42,157,143,.25);  border-color: var(--green); color: #4cc9b8; }
-    .matra-cell.taali  { background: rgba(231,111,81,.2);   border-color: var(--red);   color: #f4a261; }
-    .matra-cell.khali  { background: rgba(69,123,157,.2);   border-color: var(--blue);  color: #7bb9d8; }
-    .matra-num { font-size: 0.7rem; font-weight: 700; }
-    .matra-bol { font-size: 0.5rem; margin-top: 2px; }
+
+    .speed-btn.active,
+    .speed-btn:hover {
+      background: var(--surface);
+      color: var(--accent-dark);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Live Inspector Callout Banner */
+    .matra-inspector-banner {
+      background: #ffffff;
+      border: 1px solid #ebd9c2;
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--text);
+      min-height: 44px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      flex-wrap: wrap;
+    }
+
+    .inspector-bol-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: var(--accent-dark);
+      font-size: 0.92rem;
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+
+    .inspector-status-badge {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .inspector-status-badge.on-beat {
+      background: rgba(22, 101, 52, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(22, 101, 52, 0.25);
+    }
+
+    .inspector-status-badge.early {
+      background: rgba(245, 158, 11, 0.15);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .inspector-status-badge.late {
+      background: rgba(153, 27, 27, 0.1);
+      color: var(--red);
+      border: 1px solid rgba(153, 27, 27, 0.25);
+    }
+
+    .inspector-status-badge.missed {
+      background: #f3f4f6;
+      color: #6b7280;
+      border: 1px solid #d1d5db;
+    }
+
+    /* ── Avartan (Cycle) Switcher for Multi-Cycle Audio ── */
+    .cycle-switcher-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      background: #faf6f0;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .cycle-switcher-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--muted);
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+
+    .cycle-pills-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cycle-pill-btn {
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: #ffffff;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+      transition: all .2s ease;
+    }
+
+    .cycle-pill-btn:hover {
+      border-color: var(--terracotta);
+      color: var(--terracotta);
+    }
+
+    .cycle-pill-btn.active {
+      background: var(--terracotta);
+      color: #ffffff;
+      border-color: var(--terracotta);
+      box-shadow: 0 2px 8px rgba(154, 52, 18, 0.35);
+    }
+
+    /* ── The Correct Time & Bol Slider ── */
+    .bol-slider-wrapper {
+      position: relative;
+      user-select: none;
+      padding-top: 4px;
+    }
+
+    .slider-track-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .slider-timeline-track {
+      position: relative;
+      height: 72px;
+      background: #ffffff;
+      border: 1.5px solid #d9ccbc;
+      border-radius: 10px;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .slider-progress-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 138, 0.35) 100%);
+      pointer-events: none;
+      transition: width 0.05s linear;
+    }
+
+    /* Scrubber needle / thumb */
+    .slider-scrubber-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--terracotta);
+      pointer-events: none;
+      left: 0%;
+      z-index: 10;
+      transform: translateX(-50%);
+      transition: left 0.05s linear;
+      box-shadow: 0 0 6px rgba(154, 52, 18, 0.6);
+    }
+
+    .slider-scrubber-thumb {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      background: var(--terracotta);
+      border: 2.5px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      cursor: grab;
+      z-index: 11;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      transition: left 0.05s linear;
+    }
+
+    /* Canonical Bols along the track */
+    .canonical-bol-marker {
+      position: absolute;
+      top: 6px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 4;
+      transition: transform .2s ease;
+    }
+
+    .canonical-bol-marker:hover {
+      transform: translateX(-50%) scale(1.15);
+    }
+
+    .canonical-bol-marker.active {
+      transform: translateX(-50%) scale(1.2);
+      z-index: 8;
+    }
+
+    .bol-chip-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: rgba(120, 53, 15, 0.08);
+      color: var(--accent-dark);
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+      border: 1px solid rgba(120, 53, 15, 0.18);
+      white-space: nowrap;
+      transition: all .2s;
+    }
+
+    .canonical-bol-marker.sam .bol-chip-tag {
+      background: rgba(22, 101, 52, 0.15);
+      color: var(--green);
+      border-color: var(--green);
+      font-weight: 800;
+    }
+
+    .canonical-bol-marker.khali .bol-chip-tag {
+      background: rgba(30, 64, 175, 0.15);
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .canonical-bol-marker.active .bol-chip-tag {
+      background: var(--terracotta);
+      color: #ffffff;
+      border-color: var(--terracotta);
+      box-shadow: 0 2px 8px rgba(154, 52, 18, 0.4);
+    }
+
+    .bol-matra-num {
+      font-size: 0.56rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Vibhag boundary partition bar on slider */
+    .slider-vibhag-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #cfc1b0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .slider-vibhag-divider.avartan-end {
+      width: 4px;
+      border-left: 1.5px solid #a8947f;
+      border-right: 1.5px solid #a8947f;
+      background: transparent;
+    }
+
+    /* Dancer strike onset pins on lower portion of track */
+    .user-strike-pin {
+      position: absolute;
+      bottom: 6px;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      z-index: 5;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+
+    .user-strike-pin.on-beat {
+      background: var(--green);
+    }
+
+    .user-strike-pin.early {
+      background: #f59e0b;
+    }
+
+    .user-strike-pin.late {
+      background: var(--red);
+    }
+
+    .user-strike-pin.missed {
+      background: #9ca3af;
+      width: 6px;
+      height: 6px;
+      border-radius: 0;
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    /* ── Authentic Kathak Vibhag Notation Visualization ── */
+    .kathak-notation-board {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .kathak-shastra-banner {
+      background: linear-gradient(135deg, #fef7ed 0%, #faede1 100%);
+      border: 1px solid #ebd9c2;
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .shastra-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--accent-dark);
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .shastra-rules {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .rule-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+    }
+
+    .rule-chip.sam {
+      color: var(--green);
+      border-color: rgba(22, 101, 52, 0.3);
+    }
+
+    .rule-chip.taali {
+      color: var(--terracotta);
+      border-color: rgba(154, 52, 18, 0.3);
+    }
+
+    .rule-chip.khali {
+      color: var(--blue);
+      border-color: rgba(30, 64, 175, 0.3);
+    }
+
+    /* Classical Avartans (Cycles) Rows Container */
+    .avartans-container {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .avartan-block {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #fffdfa;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 2px 10px rgba(120, 53, 15, 0.03);
+    }
+
+    .avartan-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: #faf6f0;
+      border: 1px solid rgba(217, 119, 6, 0.2);
+      border-radius: 8px;
+    }
+
+    .avartan-hdr-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avartan-badge {
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--terracotta);
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+
+    .avartan-range {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(217, 119, 6, 0.1);
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .avartan-hdr-right {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--muted);
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+
+    /* The 4 Vibhags Grid */
+    .vibhags-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .vibhags-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 540px) {
+      .vibhags-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .vibhag-card {
+      background: #fffdfa;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px rgba(120, 53, 15, 0.04);
+      transition: all .25s ease;
+      position: relative;
+    }
+
+    .vibhag-card.sam-vibhag {
+      border-color: rgba(22, 101, 52, 0.35);
+    }
+
+    .vibhag-card.taali-vibhag {
+      border-color: rgba(154, 52, 18, 0.3);
+    }
+
+    .vibhag-card.khali-vibhag {
+      border-color: rgba(30, 64, 175, 0.3);
+    }
+
+    .vibhag-card-hdr {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1.5px solid var(--border);
+      background: #faf6f0;
+    }
+
+    .vibhag-card.sam-vibhag .vibhag-card-hdr {
+      background: rgba(22, 101, 52, 0.08);
+      border-color: rgba(22, 101, 52, 0.2);
+    }
+
+    .vibhag-card.taali-vibhag .vibhag-card-hdr {
+      background: rgba(154, 52, 18, 0.06);
+      border-color: rgba(154, 52, 18, 0.15);
+    }
+
+    .vibhag-card.khali-vibhag .vibhag-card-hdr {
+      background: rgba(30, 64, 175, 0.06);
+      border-color: rgba(30, 64, 175, 0.15);
+    }
+
+    .vibhag-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .vibhag-hdr-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text);
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+
+    .vibhag-hdr-kriya {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .vibhag-sign-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .vibhag-sign-badge.sam {
+      background: var(--green);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(22, 101, 52, 0.3);
+    }
+
+    .vibhag-sign-badge.taali {
+      background: var(--terracotta);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(154, 52, 18, 0.3);
+    }
+
+    .vibhag-sign-badge.khali {
+      background: var(--blue);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3);
+    }
+
+    /* 4 Matra Rows/Cells in each Vibhag */
+    .vibhag-cells-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kathak-matra-cell {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0e9df;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all .2s ease;
+      background: #ffffff;
+      position: relative;
+    }
+
+    .kathak-matra-cell:last-child {
+      border-bottom: none;
+    }
+
+    .kathak-matra-cell:hover {
+      background: #fff8ef;
+    }
+
+    .kathak-matra-cell.active-matra {
+      background: linear-gradient(90deg, #fef3c7 0%, #fffdfa 100%);
+      box-shadow: inset 4px 0 0 var(--accent);
+      transform: scale(1.02);
+      z-index: 3;
+    }
+
+    .kathak-matra-cell.past-audio {
+      opacity: 0.45;
+      cursor: default;
+      background: #fbf9f6;
+    }
+
+    .kathak-matra-cell.past-audio:hover {
+      background: #fbf9f6;
+    }
+
+    .matra-cell-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .matra-index-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      min-width: 28px;
+    }
+
+    .matra-bol-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+
+    .matra-bol-dev {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .matra-bol-rom {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .matra-cell-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    /* Performance Diagnosis Badges */
+    .diag-pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .diag-pill.on-beat {
+      background: rgba(22, 101, 52, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(22, 101, 52, 0.2);
+    }
+
+    .diag-pill.early {
+      background: rgba(245, 158, 11, 0.12);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .diag-pill.late {
+      background: rgba(153, 27, 27, 0.08);
+      color: var(--red);
+      border: 1px solid rgba(153, 27, 27, 0.2);
+    }
+
+    .diag-pill.missed {
+      background: #f3f4f6;
+      color: #6b7280;
+      border: 1px solid #d1d5db;
+    }
+
+    .matra-gesture-note {
+      font-size: 0.62rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
 
     /* ── Bols ── */
     .bol-tokens {
-      display: flex; flex-wrap: wrap; gap: 7px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
+
     .bol-token {
-      padding: 5px 11px;
-      border-radius: 7px;
-      font-size: 0.82rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
       font-weight: 600;
-      background: rgba(124,106,247,.12);
-      border: 1px solid rgba(124,106,247,.25);
-      color: #c4baf9;
-      animation: pop-in .3s ease both;
+      background: rgba(180, 83, 9, .08);
+      border: 1px solid rgba(180, 83, 9, .2);
+      color: var(--accent-dark);
     }
-    @keyframes pop-in { from { opacity:0; transform:scale(.8); } to { opacity:1; transform:scale(1); } }
 
     /* ── Feedback ── */
-    .feedback-list { display: flex; flex-direction: column; gap: 10px; }
-    .feedback-item {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 12px 14px;
-      border-radius: 9px;
-      font-size: 0.87rem;
-      background: var(--surface);
-      border-left: 3px solid var(--muted);
+    .feedback-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    .feedback-item.EXCELLENT { border-color: var(--green);  background: rgba(42,157,143,.07); }
-    .feedback-item.INFO      { border-color: var(--blue);   background: rgba(69,123,157,.07); }
-    .feedback-item.WARNING   { border-color: var(--accent2);background: rgba(233,168,76,.07); }
-    .feedback-item.CRITICAL  { border-color: var(--red);    background: rgba(231,111,81,.07); }
-    .feedback-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
-    .feedback-cat  { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
 
-    /* ── Plots ── */
+    .feedback-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      background: #faf6f0;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .feedback-item.EXCELLENT {
+      border-left-color: var(--green);
+      background: rgba(22, 101, 52, .04);
+    }
+
+    .feedback-item.INFO {
+      border-left-color: var(--blue);
+      background: rgba(30, 64, 175, .04);
+    }
+
+    .feedback-item.WARNING {
+      border-left-color: var(--accent);
+      background: rgba(180, 83, 9, .04);
+    }
+
+    .feedback-item.CRITICAL {
+      border-left-color: var(--red);
+      background: rgba(153, 27, 27, .04);
+    }
+
+    .feedback-icon {
+      font-size: 1.05rem;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .feedback-cat {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Swipeable Visual Diagnostics Carousel ── */
+    .carousel-container {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .carousel-track-wrapper {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      display: flex;
+      gap: 16px;
+      padding-bottom: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) var(--border);
+    }
+
+    .carousel-track-wrapper::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .carousel-track-wrapper::-webkit-scrollbar-track {
+      background: #faf6f0;
+      border-radius: 4px;
+    }
+
+    .carousel-track-wrapper::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 4px;
+    }
+
+    .carousel-slide {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .slide-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
     .plot-img {
-      width: 100%; border-radius: 10px;
+      width: 100%;
+      border-radius: 8px;
       border: 1px solid var(--border);
       display: block;
-      margin-top: 6px;
+      background: #fff;
+    }
+
+    .carousel-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .carousel-btn {
+      background: #faf6f0;
+      border: 1px solid var(--border);
+      color: var(--accent-dark);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+
+    .carousel-btn:hover {
+      background: #fef3c7;
+      border-color: var(--accent);
+    }
+
+    .carousel-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .carousel-dot.active {
+      background: var(--accent);
     }
 
     /* ── Transcript ── */
     .transcript-box {
-      background: var(--surface);
+      background: #faf6f0;
       border: 1px solid var(--border);
       border-radius: 9px;
       padding: 14px;
       font-size: 0.85rem;
-      color: var(--muted);
+      color: #44403c;
       line-height: 1.6;
       font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
       max-height: 100px;
@@ -346,347 +1642,1520 @@
 
     /* ── Section header ── */
     .section-hdr {
-      font-size: 1.1rem; font-weight: 700;
-      margin: 32px 0 16px;
-      display: flex; align-items: center; gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
     }
+
     .section-hdr::after {
       content: '';
       flex: 1;
       height: 1px;
-      background: linear-gradient(to right, var(--border), transparent);
+      background: var(--border);
     }
 
     /* ── Processing time ── */
     .proc-time {
-      text-align: center; color: var(--muted);
-      font-size: 0.78rem; margin-top: 8px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-top: 20px;
     }
 
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    /* ── Vibhag Legend ── */
+    .vibhag-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: #faf6f0;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .legend-sym {
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      border: 1.5px solid;
+    }
+
+    .legend-sym.sam {
+      background: rgba(22, 101, 52, 0.15);
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .legend-sym.taali {
+      background: rgba(153, 27, 27, 0.12);
+      color: var(--red);
+      border-color: var(--red);
+    }
+
+    .legend-sym.khali {
+      background: rgba(30, 64, 175, 0.12);
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    /* Status dots legend */
+    .status-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #faf6f0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .status-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
   </style>
 </head>
+
 <body>
 
-<!-- ── Hero ─────────────────────────────────────── -->
-<header class="hero">
-  <h1>🩰 Kathak AI</h1>
-  <p class="subtitle">
-    AI-powered Tala rhythm tracking, bol recognition, and performance evaluation
-    for Indian Classical Dance
-  </p>
-  <div class="pillars-badge">
-    <span class="badge badge-teal">Stage 1: Mel Spectrogram & MFCCs</span>
-    <span class="badge badge-purple">Stage 2: Teental Matra Grid</span>
-    <span class="badge badge-gold">Stage 3: Kathak Bol Recognition</span>
-    <span class="badge badge-orange">Stage 4: Guru Evaluation</span>
-  </div>
-</header>
+  <!-- ── COMPACT WARM HERO HEADER ──────────────────────── -->
+  <header class="hero">
+    <div class="hero-content">
 
-<!-- ── Main ──────────────────────────────────────── -->
-<main class="container">
-
-  <!-- Upload + Library -->
-  <div class="grid-2">
-
-    <!-- Upload Zone -->
-    <div class="card">
-      <div class="card-title">Upload Recording</div>
-      <div class="upload-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".wav,.mp3,.flac" />
-        <span class="upload-icon">🎵</span>
-        <h2>Drop your Kathak audio here</h2>
-        <p>or click to select a WAV / MP3 / FLAC file</p>
-      </div>
-      <p id="selectedFile" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></p>
-      <button class="btn-analyze" id="analyzeBtn" disabled>Analyze Performance</button>
-    </div>
-
-    <!-- Sample Library -->
-    <div class="card">
-      <div class="card-title">Sample Library</div>
-      <div class="library-list" id="libraryList">
-        <div style="color:var(--muted);font-size:.85rem;">Loading…</div>
+      <div style="text-align: left;">
+        <h1>Kathak AI</h1>
+        <p class="subtitle">AI-powered Tala rhythm tracking, bol recognition &amp; performance evaluation</p>
       </div>
     </div>
-
-  </div>
-
-  <!-- Loader -->
-  <div class="loader" id="loader">
-    <div class="spinner"></div>
-    <div class="loader-stages">
-      <div class="loader-stage" id="s1"><div class="stage-dot"></div>Stage 1 — Extracting spectral features…</div>
-      <div class="loader-stage" id="s2"><div class="stage-dot"></div>Stage 2 — Tracking Tala & 16-Matra grid…</div>
-      <div class="loader-stage" id="s3"><div class="stage-dot"></div>Stage 3 — Transcribing Kathak bols (Whisper)…</div>
-      <div class="loader-stage" id="s4"><div class="stage-dot"></div>Stage 4 — Evaluating performance…</div>
+    <div class="pillars-badge">
+      <span class="badge badge-amber">Stage 1: Spectrogram &amp; MFCCs</span>
+      <span class="badge badge-brown">Stage 2: Teental Matra Grid</span>
+      <span class="badge badge-green">Stage 3: Bol Recognition</span>
+      <span class="badge badge-terra">Stage 4: Guru Evaluation</span>
     </div>
-  </div>
+  </header>
 
-  <!-- Results Panel -->
-  <div id="results">
+  <main class="container">
 
-    <!-- ── Grade Banner ── -->
-    <div class="grade-banner" id="gradeBanner">
-      <div class="grade-left">
-        <h2 id="gradeTitle">—</h2>
-        <p  id="gradeSubtitle">—</p>
+    <!-- ════════════ SCREEN 1: HOME / UPLOAD ════════════ -->
+    <div id="homeScreen" class="screen active">
+      <div class="grid-3">
+
+        <!-- Upload Zone -->
+        <div class="card">
+          <div class="card-title">Upload Recording</div>
+          <div class="upload-zone" id="dropZone">
+            <input type="file" id="fileInput" accept=".wav,.mp3,.flac" />
+            <span class="upload-icon">🎵</span>
+            <h2>Drop your Kathak audio here</h2>
+            <p>or click to select a WAV / MP3 / FLAC file</p>
+          </div>
+          <p id="selectedFile" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></p>
+
+          <!-- Tala Mode Selection Dropdown -->
+          <div style="margin-top:12px;margin-bottom:12px;text-align:left;">
+            <label for="taalSelector"
+              style="display:block;font-size:0.8rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;">
+              🎯 ताल चयन (Tala Selection / Mode):
+            </label>
+            <select id="taalSelector"
+              style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;background:#faf6f0;color:var(--text);font-family:inherit;font-weight:600;cursor:pointer;">
+              <option value="Auto" selected>✨ ऑटो-डिटेक्ट ताल (Auto-Detect from Recited Bols)</option>
+              <option value="Teental">तीनताल (Teental — 16 मात्रा, 4+4+4+4)</option>
+              <option value="Jhaptaal">झपताल (Jhaptaal — 10 मात्रा, 2+3+2+3)</option>
+              <option value="Kehrava">कहरवा (Kehrava — 8 मात्रा, 4+4)</option>
+              <option value="Dadra">दादरा (Dadra — 6 मात्रा, 3+3)</option>
+            </select>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">
+              झपताल (10), दादरा (6), कहरवा (8) या तीनताल (16) — बोल सुनकर स्वचालित ताल पहचान
+            </div>
+          </div>
+
+          <button class="btn-analyze" id="analyzeBtn" disabled>Analyze Performance</button>
+        </div>
+
+        <!-- Record Zone -->
+        <div class="card">
+          <div class="card-title">🎙️ Record Live</div>
+          <div class="record-zone" id="recordZone">
+            <div class="record-label" id="recordLabel">Tap to start recording your Kathak padhant</div>
+            <button class="record-btn" id="recordBtn">
+              <div class="record-btn-inner"></div>
+            </button>
+            <div class="record-timer" id="recordTimer">00:00</div>
+            <canvas class="record-waveform" id="recordWaveform"></canvas>
+            <div class="record-preview" id="recordPreview">
+              <audio id="recordedAudio" controls></audio>
+              <div class="record-actions">
+                <button class="btn-sm" id="discardRecording">Discard</button>
+                <button class="btn-sm primary" id="useRecording">Use for Analysis</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sample Library -->
+        <div class="card">
+          <div class="card-title">Sample Library</div>
+          <div class="library-list" id="libraryList">
+            <div style="color:var(--muted);font-size:.85rem;">Loading…</div>
+          </div>
+        </div>
+
       </div>
-      <div class="grade-circle" id="gradeCircle" style="--pct:0">
-        <div class="grade-inner">
-          <div class="grade-letter" id="gradeLetter">—</div>
-          <div class="grade-score"  id="gradeScore">—</div>
+    </div><!-- /homeScreen -->
+
+
+    <!-- ════════════ SCREEN 2: LOADER & RESULTS ════════════ -->
+    <div id="resultsScreen" class="screen">
+
+      <!-- Top Navigation Bar with Back Button -->
+      <div class="nav-bar">
+        <button class="btn-back" id="backBtn">
+          ← Back to Upload &amp; Library
+        </button>
+        <div style="font-size: 0.85rem; color: var(--muted); font-weight: 500;" id="currentFilenameBadge"></div>
+      </div>
+
+      <!-- Loader State -->
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <div class="loader-stages">
+          <div class="loader-stage" id="s1">
+            <div class="stage-dot"></div>Stage 1 — Extracting spectral features…
+          </div>
+          <div class="loader-stage" id="s2">
+            <div class="stage-dot"></div>Stage 2 — Tracking Tala &amp; 16-Matra grid…
+          </div>
+          <div class="loader-stage" id="s3">
+            <div class="stage-dot"></div>Stage 3 — Transcribing Kathak bols (Whisper)…
+          </div>
+          <div class="loader-stage" id="s4">
+            <div class="stage-dot"></div>Stage 4 — Evaluating performance…
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- ── 4 Pillars ── -->
-    <div class="section-hdr">⚖️ Four Pillars of Performance</div>
-    <div class="grid-4" id="pillarsGrid"></div>
+      <!-- Actual Results Content (Hidden until analysis completes) -->
+      <div id="resultsContent" style="display:none;">
 
-    <!-- ── Tala Info ── -->
-    <div class="section-hdr">🥁 Tala & Rhythm Analysis</div>
-    <div class="card">
-      <div class="tala-info" id="talaChips"></div>
-      <div class="card-title" style="margin-top:8px;">16-Matra Teental Structure</div>
-      <div class="matra-grid" id="matraGrid"></div>
-    </div>
+        <!-- Grade Banner -->
+        <div class="grade-banner" id="gradeBanner">
+          <div class="grade-left">
+            <h2 id="gradeTitle">—</h2>
+            <p id="gradeSubtitle">—</p>
+          </div>
+          <div class="grade-circle" id="gradeCircle" style="--pct:0">
+            <div class="grade-inner">
+              <div class="grade-letter" id="gradeLetter">—</div>
+              <div class="grade-score" id="gradeScore">—</div>
+            </div>
+          </div>
+        </div>
 
-    <!-- ── Bols ── -->
-    <div class="section-hdr">🗣️ Detected Kathak Bols</div>
-    <div class="card">
-      <div class="card-title" style="margin-bottom:8px;">Normalized Tokens — <span id="bolCount" style="color:var(--accent)"></span></div>
-      <div class="bol-tokens" id="bolTokens"></div>
-      <div class="card-title" style="margin-top:16px;">Raw ASR Transcript</div>
-      <div class="transcript-box" id="transcript"></div>
-    </div>
+        <!-- 4 Pillars -->
+        <div class="section-hdr">⚖️ Four Pillars of Performance</div>
+        <div class="grid-4" id="pillarsGrid"></div>
 
-    <!-- ── Feedback ── -->
-    <div class="section-hdr">📋 Guru Diagnostics & Critique</div>
-    <div class="feedback-list" id="feedbackList"></div>
+        <!-- Tala Info + Integrated Audio Playback & Bol Slider + Authentic Vibhag Notation -->
+        <div class="section-hdr">🥁 Tala &amp; Rhythm Analysis</div>
+        <div class="tala-header-card">
+          <!-- Active / Detected Tala Banner -->
+          <div id="detectedTalaBanner"
+            style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(135deg,#fef7ed,#faede1);border:1.5px solid var(--accent);border-radius:10px;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:1.7rem;">🥁</span>
+              <div>
+                <div id="detectedTalaTitle"
+                  style="font-size:1.05rem;font-weight:800;color:var(--accent-dark);font-family:'Noto Sans Devanagari',sans-serif;">
+                  —</div>
+                <div id="detectedTalaSub" style="font-size:0.75rem;color:var(--muted);font-weight:600;">—</div>
+              </div>
+            </div>
+            <div id="detectedTalaBadge" class="badge badge-terra"
+              style="font-size:0.82rem;padding:6px 14px;font-weight:700;">—</div>
+          </div>
 
-    <!-- ── Plots ── -->
-    <div class="section-hdr">📊 Visual Diagnostics</div>
-    <div class="grid-2">
-      <div class="card"><div class="card-title">Mel Spectrogram & MFCCs</div>   <img id="plotFeatures" class="plot-img" /></div>
-      <div class="card"><div class="card-title">Teental Grid Alignment</div>     <img id="plotTala"     class="plot-img" /></div>
-    </div>
-    <div class="grid-2" style="margin-top:20px;">
-      <div class="card"><div class="card-title">Bol Recognition Timeline</div>   <img id="plotBols"     class="plot-img" /></div>
-      <div class="card"><div class="card-title">Performance Report Card</div>    <img id="plotReport"   class="plot-img" /></div>
-    </div>
+          <!-- Tala metrics chips -->
+          <div class="tala-info" id="talaChips"></div>
 
-    <p class="proc-time" id="procTime"></p>
+          <!-- Integrated Audio Playback & Interactive Bol Slider -->
+          <div class="tala-player-box">
+            <div class="tala-player-controls">
+              <div class="tala-player-left">
+                <button class="play-btn-tala" id="playBtn" title="Play / Pause Analysis Audio">▶</button>
+                <div class="playback-time-badge" id="playbackTime">0:00.0 / 0:00.0</div>
+              </div>
+              <div class="speed-btn-group">
+                <span style="font-size:0.68rem;color:var(--muted);margin-right:4px;font-weight:600;">Laya Speed:</span>
+                <button class="speed-btn" data-speed="0.5">0.5×</button>
+                <button class="speed-btn" data-speed="0.75">0.75×</button>
+                <button class="speed-btn active" data-speed="1.0">1.0×</button>
+                <button class="speed-btn" data-speed="1.25">1.25×</button>
+              </div>
+            </div>
 
-  </div><!-- /results -->
+            <!-- Dynamic Live Diagnostic Readout as Slider moves -->
+            <div class="matra-inspector-banner" id="liveInspector">
+              <div class="inspector-bol-badge" id="inspectorBol">
+                <span>🎵</span> <span>Scrub the slider or click ▶ to inspect your padhant in time</span>
+              </div>
+              <div class="inspector-status-badge on-beat" id="inspectorBadge">
+                <span>Kathak Tala Grid Synchronized</span>
+              </div>
+            </div>
 
-</main>
+            <!-- Avartan (Cycle) Switcher - active when audio is longer than 1 cycle -->
+            <div class="cycle-switcher-wrap" id="cycleSwitcherWrap" style="display:none;">
+              <span class="cycle-switcher-label">🔄 आवर्तन (Cycle):</span>
+              <div class="cycle-pills-list" id="cyclePillsList"></div>
+            </div>
 
-<script>
-// ── Constants ────────────────────────────────────────────────────────────────
-const TEENTAL_BOLS = [
-  'Dha','Dhin','Dhin','Dha',
-  'Dha','Dhin','Dhin','Dha',
-  'Dha','Tin','Tin','Ta',
-  'Ta','Dhin','Dhin','Dha'
-];
-const MATRA_ACTIONS = {1:'sam',5:'taali',9:'khali',13:'taali'};
+            <!-- The Single Canonical Tala Slider (Dynamically adapted to active Tala) -->
+            <div class="bol-slider-wrapper">
+              <div class="slider-track-legend" id="sliderLegend">
+                <span id="sliderLegendLeft">◀ Canonical 16-Matra Bol Grid (The Correct Time)</span>
+                <span id="sliderLegendRight">Your Strike Onsets (Early / Late Timing Error) ▶</span>
+              </div>
+              <div class="slider-timeline-track" id="sliderTrack">
+                <div class="slider-progress-fill" id="sliderFill"></div>
+                <!-- Canonical Matra Markers & Bol Pills added via JS -->
+                <div id="sliderMarkersContainer"></div>
+                <!-- User Strike Pins added via JS -->
+                <div id="sliderStrikesContainer"></div>
+                <!-- Scrubber Line and Thumb -->
+                <div class="slider-scrubber-line" id="sliderLine"></div>
+                <div class="slider-scrubber-thumb" id="sliderThumb"></div>
+              </div>
+            </div>
+          </div>
 
-const PILLAR_META = [
-  { key:'laya_stability',  label:'Laya Sthirata', sub:'Tempo Stability',   color:'#2a9d8f' },
-  { key:'sam_precision',   label:'Sam Precision',  sub:'Beat 1 Accuracy',   color:'#e9a84c' },
-  { key:'matra_synchrony', label:'Matra Synchrony',sub:'Rhythmic Jitter',   color:'#7c6af7' },
-  { key:'bol_accuracy',    label:'Bol Shuddhata',  sub:'Syllable Accuracy', color:'#e76f51' },
-];
+          <!-- Authentic Kathak Vibhag Visualization (भातखंडे ताल लिपि) -->
+          <div class="kathak-notation-board">
+            <div class="kathak-shastra-banner">
+              <div class="shastra-title" id="shastraTitle">
+                <span>📖</span>
+                <span id="shastraTitleText">भातखंडे ताल लिपि (Vibhag Structure)</span>
+              </div>
+              <div class="shastra-rules" id="shastraRules"></div>
+            </div>
 
-const FEEDBACK_ICONS = {
-  EXCELLENT:'✅', INFO:'ℹ️', WARNING:'⚠️', CRITICAL:'🚨'
-};
+            <!-- The Classical Avartan / Vibhags Rows Container -->
+            <div class="avartans-container" id="vibhagsContainer"></div>
+          </div>
+        </div>
 
-// ── Refs ─────────────────────────────────────────────────────────────────────
-const dropZone   = document.getElementById('dropZone');
-const fileInput  = document.getElementById('fileInput');
-const selectedFile= document.getElementById('selectedFile');
-const analyzeBtn = document.getElementById('analyzeBtn');
-const loader     = document.getElementById('loader');
-const results    = document.getElementById('results');
+        <!-- Bols -->
+        <div class="section-hdr">🗣️ Detected Kathak Bols</div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:8px;">Normalized Tokens — <span id="bolCount"
+              style="color:var(--accent)"></span></div>
+          <div class="bol-tokens" id="bolTokens"></div>
+          <div class="card-title" style="margin-top:14px;">Raw ASR Transcript</div>
+          <div class="transcript-box" id="transcript"></div>
+        </div>
 
-let selectedFileObj = null;
+        <!-- Feedback -->
+        <div class="section-hdr">📋 Guru Diagnostics &amp; Critique</div>
+        <div class="feedback-list" id="feedbackList"></div>
 
-// ── Library ───────────────────────────────────────────────────────────────────
-async function loadLibrary() {
-  try {
-    const r = await fetch('/library');
-    const data = await r.json();
-    const list = document.getElementById('libraryList');
-    if (!data.recordings.length) {
-      list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">No recordings found in data/raw/</div>';
-      return;
+        <!-- Swipeable Visual Diagnostics Carousel -->
+        <div class="section-hdr">📊 Visual Diagnostics (Swipeable)</div>
+        <div class="carousel-container">
+          <div class="carousel-track-wrapper" id="carouselTrack">
+            <!-- Slide 1 -->
+            <div class="carousel-slide" data-index="0">
+              <div class="slide-title"><span>Mel Spectrogram &amp; MFCCs</span><span>1 / 4</span></div>
+              <img id="plotFeatures" class="plot-img" alt="Mel Spectrogram & MFCCs" />
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-slide" data-index="1">
+              <div class="slide-title"><span>Teental Grid Alignment</span><span>2 / 4</span></div>
+              <img id="plotTala" class="plot-img" alt="Teental Grid Alignment" />
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-slide" data-index="2">
+              <div class="slide-title"><span>Bol Recognition Timeline</span><span>3 / 4</span></div>
+              <img id="plotBols" class="plot-img" alt="Bol Recognition Timeline" />
+            </div>
+            <!-- Slide 4 -->
+            <div class="carousel-slide" data-index="3">
+              <div class="slide-title"><span>Performance Report Card</span><span>4 / 4</span></div>
+              <img id="plotReport" class="plot-img" alt="Performance Report Card" />
+            </div>
+          </div>
+
+          <!-- Carousel Controls -->
+          <div class="carousel-nav">
+            <button class="carousel-btn" id="prevSlideBtn">← Previous</button>
+            <div class="carousel-dots" id="carouselDots">
+              <div class="carousel-dot active" data-slide="0"></div>
+              <div class="carousel-dot" data-slide="1"></div>
+              <div class="carousel-dot" data-slide="2"></div>
+              <div class="carousel-dot" data-slide="3"></div>
+            </div>
+            <button class="carousel-btn" id="nextSlideBtn">Next →</button>
+          </div>
+        </div>
+
+        <p class="proc-time" id="procTime"></p>
+
+      </div><!-- /resultsContent -->
+
+    </div><!-- /resultsScreen -->
+
+  </main>
+
+  <script>
+    // ── Classical Tala Dictionaries & Shastra Rubrics ───────────────────────────
+    const TALA_DICTIONARY = {
+      Teental: {
+        name: 'Teental',
+        display: 'तीनताल (Teental)',
+        matras: 16,
+        vibhags: [4, 4, 4, 4],
+        structure: '4 + 4 + 4 + 4',
+        legend: 'सम (1) · ताली २ (5) · खाली (9) · ताली ३ (13)',
+        shastraTitle: 'तीनताल भातखंडे ताल लिपि (16-Matra Teental Vibhag Structure)',
+        rules: [
+          { text: 'X: सम (समताल Resolution)', cls: 'sam' },
+          { text: '२, ३: भरी (तालीस 5 & 13)', cls: 'taali' },
+          { text: '०: खाली (Wave Beat 9)', cls: 'khali' },
+        ],
+        vibhagDefs: [
+          { id: 1, name: 'विभाग १ (Vibhag I)', sign: 'X', label: 'सम (Sam)', cls: 'sam', kriya: 'भरी — ताली १', matras: [1, 2, 3, 4] },
+          { id: 2, name: 'विभाग २ (Vibhag II)', sign: '२', label: 'दूसरी ताली', cls: 'taali', kriya: 'भरी — ताली २', matras: [5, 6, 7, 8] },
+          { id: 3, name: 'विभाग ३ (Vibhag III)', sign: '०', label: 'खाली (Khali)', cls: 'khali', kriya: 'निष्शब्द — खाली', matras: [9, 10, 11, 12] },
+          { id: 4, name: 'विभाग ४ (Vibhag IV)', sign: '३', label: 'तीसरी ताली', cls: 'taali', kriya: 'भरी — ताली ३', matras: [13, 14, 15, 16] },
+        ],
+        matrasMeta: [
+          { matra: 1, bol: 'Dha', devanagari: 'धा', vibhag: 1, sign: 'X', action: 'सम (Sam)', gesture: 'ताली १ 👏' },
+          { matra: 2, bol: 'Dhin', devanagari: 'धिं', vibhag: 1, sign: '२', action: 'मात्रा २', gesture: 'अंगुली २' },
+          { matra: 3, bol: 'Dhin', devanagari: 'धिं', vibhag: 1, sign: '३', action: 'मात्रा ३', gesture: 'अंगुली ३' },
+          { matra: 4, bol: 'Dha', devanagari: 'धा', vibhag: 1, sign: '४', action: 'मात्रा ४', gesture: 'अंगुली ४' },
+          { matra: 5, bol: 'Dha', devanagari: 'धा', vibhag: 2, sign: '२', action: 'ताली २', gesture: 'ताली २ 👏' },
+          { matra: 6, bol: 'Dhin', devanagari: 'धिं', vibhag: 2, sign: '६', action: 'मात्रा ६', gesture: 'अंगुली ६' },
+          { matra: 7, bol: 'Dhin', devanagari: 'धिं', vibhag: 2, sign: '७', action: 'मात्रा ७', gesture: 'अंगुली ७' },
+          { matra: 8, bol: 'Dha', devanagari: 'धा', vibhag: 2, sign: '८', action: 'मात्रा ८', gesture: 'अंगुली ८' },
+          { matra: 9, bol: 'Dha', devanagari: 'धा', vibhag: 3, sign: '०', action: 'खाली ०', gesture: 'खाली ✋ (Wave)' },
+          { matra: 10, bol: 'Tin', devanagari: 'तिं', vibhag: 3, sign: '१०', action: 'मात्रा १०', gesture: 'अंगुली १०' },
+          { matra: 11, bol: 'Tin', devanagari: 'तिं', vibhag: 3, sign: '११', action: 'मात्रा ११', gesture: 'अंगुली ११' },
+          { matra: 12, bol: 'Ta', devanagari: 'ता', vibhag: 3, sign: '१२', action: 'मात्रा १२', gesture: 'अंगुली १२' },
+          { matra: 13, bol: 'Ta', devanagari: 'ता', vibhag: 4, sign: '३', action: 'ताली ३', gesture: 'ताली ३ 👏' },
+          { matra: 14, bol: 'Dhin', devanagari: 'धिं', vibhag: 4, sign: '१४', action: 'मात्रा १४', gesture: 'अंगुली १४' },
+          { matra: 15, bol: 'Dhin', devanagari: 'धिं', vibhag: 4, sign: '१५', action: 'मात्रा १५', gesture: 'अंगुली १५' },
+          { matra: 16, bol: 'Dha', devanagari: 'धा', vibhag: 4, sign: '१६', action: 'मात्रा १६', gesture: 'अंगुली १६' },
+        ]
+      },
+      Jhaptaal: {
+        name: 'Jhaptaal',
+        display: 'झपताल (Jhaptaal)',
+        matras: 10,
+        vibhags: [2, 3, 2, 3],
+        structure: '2 + 3 + 2 + 3',
+        legend: 'सम (1) · ताली २ (3) · खाली (6) · ताली ३ (8)',
+        shastraTitle: 'झपताल भातखंडे ताल लिपि (10-Matra Jhaptaal: 2+3+2+3)',
+        rules: [
+          { text: 'X: सम (ताली १, Beat 1)', cls: 'sam' },
+          { text: '२: ताली २ (Beat 3 Accent)', cls: 'taali' },
+          { text: '०: खाली (Wave Beat 6 - Drop Vocal Vazan)', cls: 'khali' },
+          { text: '३: ताली ३ (Beat 8 Accent)', cls: 'taali' },
+        ],
+        vibhagDefs: [
+          { id: 1, name: 'विभाग १ (Vibhag I)', sign: 'X', label: 'सम (Sam)', cls: 'sam', kriya: 'भरी — पहली ताली', matras: [1, 2] },
+          { id: 2, name: 'विभाग २ (Vibhag II)', sign: '२', label: 'दूसरी ताली', cls: 'taali', kriya: 'भरी — ताली २ (Accent)', matras: [3, 4, 5] },
+          { id: 3, name: 'विभाग ३ (Vibhag III)', sign: '०', label: 'खाली (Khali)', cls: 'khali', kriya: 'निष्शब्द — खाली (Drop)', matras: [6, 7] },
+          { id: 4, name: 'विभाग ४ (Vibhag IV)', sign: '३', label: 'तीसरी ताली', cls: 'taali', kriya: 'भरी — ताली ३ (Accent)', matras: [8, 9, 10] },
+        ],
+        matrasMeta: [
+          { matra: 1, bol: 'Dhi', devanagari: 'धि', vibhag: 1, sign: 'X', action: 'सम (Sam)', gesture: 'ताली १ 👏' },
+          { matra: 2, bol: 'Na', devanagari: 'ना', vibhag: 1, sign: '२', action: 'मात्रा २', gesture: 'अंगुली २' },
+          { matra: 3, bol: 'Dhi', devanagari: 'धि', vibhag: 2, sign: '२', action: 'ताली २', gesture: 'ताली २ 👏 (Accent)' },
+          { matra: 4, bol: 'Dhi', devanagari: 'धि', vibhag: 2, sign: '४', action: 'मात्रा ४', gesture: 'अंगुली ४' },
+          { matra: 5, bol: 'Na', devanagari: 'ना', vibhag: 2, sign: '५', action: 'मात्रा ५', gesture: 'अंगुली ५' },
+          { matra: 6, bol: 'Ti', devanagari: 'ति', vibhag: 3, sign: '०', action: 'खाली ०', gesture: 'खाली ✋ (Wave Drop)' },
+          { matra: 7, bol: 'Na', devanagari: 'ना', vibhag: 3, sign: '७', action: 'मात्रा ७', gesture: 'अंगुली ७' },
+          { matra: 8, bol: 'Dhi', devanagari: 'धि', vibhag: 4, sign: '३', action: 'ताली ३', gesture: 'ताली ३ 👏 (Accent)' },
+          { matra: 9, bol: 'Dhi', devanagari: 'धि', vibhag: 4, sign: '९', action: 'मात्रा ९', gesture: 'अंगुली ९' },
+          { matra: 10, bol: 'Na', devanagari: 'ना', vibhag: 4, sign: '१०', action: 'मात्रा १०', gesture: 'अंगुली १०' },
+        ]
+      },
+      Dadra: {
+        name: 'Dadra',
+        display: 'दादरा (Dadra)',
+        matras: 6,
+        vibhags: [3, 3],
+        structure: '3 + 3',
+        legend: 'सम (1) · खाली (4) — 3+3 Syncopated Waltz',
+        shastraTitle: 'दादरा भातखंडे ताल लिपि (6-Matra Dadra: 3+3 Syncopated Waltz)',
+        rules: [
+          { text: 'X: सम (ताली १, Beat 1)', cls: 'sam' },
+          { text: '०: खाली (Wave Beat 4)', cls: 'khali' },
+          { text: 'सममिति: 3+3 Balanced Halves (Waltz Lilt)', cls: 'taali' },
+        ],
+        vibhagDefs: [
+          { id: 1, name: 'विभाग १ (Vibhag I)', sign: 'X', label: 'सम (Sam)', cls: 'sam', kriya: 'भरी — पहली ताली', matras: [1, 2, 3] },
+          { id: 2, name: 'विभाग २ (Vibhag II)', sign: '०', label: 'खाली (Khali)', cls: 'khali', kriya: 'निष्शब्द — खाली', matras: [4, 5, 6] },
+        ],
+        matrasMeta: [
+          { matra: 1, bol: 'Dha', devanagari: 'धा', vibhag: 1, sign: 'X', action: 'सम (Sam)', gesture: 'ताली १ 👏' },
+          { matra: 2, bol: 'Dhi', devanagari: 'धी', vibhag: 1, sign: '२', action: 'मात्रा २', gesture: 'अंगुली २' },
+          { matra: 3, bol: 'Na', devanagari: 'ना', vibhag: 1, sign: '३', action: 'मात्रा ३', gesture: 'अंगुली ३' },
+          { matra: 4, bol: 'Dha', devanagari: 'धा', vibhag: 2, sign: '०', action: 'खाली ०', gesture: 'खाली ✋ (Wave)' },
+          { matra: 5, bol: 'Tu', devanagari: 'तू', vibhag: 2, sign: '५', action: 'मात्रा ५', gesture: 'अंगुली ५' },
+          { matra: 6, bol: 'Na', devanagari: 'ना', vibhag: 2, sign: '६', action: 'मात्रा ६', gesture: 'अंगुली ६' },
+        ]
+      },
+      Kehrava: {
+        name: 'Kehrava',
+        display: 'कहरवा (Kehrava)',
+        matras: 8,
+        vibhags: [4, 4],
+        structure: '4 + 4',
+        legend: 'सम (1) · खाली (5) — 4+4 Driving Rhythm',
+        shastraTitle: 'कहरवा भातखंडे ताल लिपि (8-Matra Kehrava: 4+4 Driving Rhythm)',
+        rules: [
+          { text: 'X: सम (ताली १, Beat 1)', cls: 'sam' },
+          { text: 'धुरी Beat 5: खाली (Wave - Pivot to Light)', cls: 'khali' },
+          { text: 'लय स्थिरता: Beat 8 tempo matches Beat 1 (No rushing)', cls: 'taali' },
+        ],
+        vibhagDefs: [
+          { id: 1, name: 'विभाग १ (Vibhag I)', sign: 'X', label: 'सम (Sam - भारी)', cls: 'sam', kriya: 'भरी — पहली ताली (Heavy)', matras: [1, 2, 3, 4] },
+          { id: 2, name: 'विभाग २ (Vibhag II)', sign: '०', label: 'खाली (Khali - हल्का)', cls: 'khali', kriya: 'निष्शब्द — खाली (Light)', matras: [5, 6, 7, 8] },
+        ],
+        matrasMeta: [
+          { matra: 1, bol: 'Dha', devanagari: 'धा', vibhag: 1, sign: 'X', action: 'सम (Sam)', gesture: 'ताली १ 👏' },
+          { matra: 2, bol: 'Ge', devanagari: 'गे', vibhag: 1, sign: '२', action: 'मात्रा २', gesture: 'अंगुली २' },
+          { matra: 3, bol: 'Na', devanagari: 'ना', vibhag: 1, sign: '३', action: 'मात्रा ३', gesture: 'अंगुली ३' },
+          { matra: 4, bol: 'Ti', devanagari: 'ती', vibhag: 1, sign: '४', action: 'मात्रा ४', gesture: 'अंगुली ४' },
+          { matra: 5, bol: 'Na', devanagari: 'ना', vibhag: 2, sign: '०', action: 'खाली ०', gesture: 'खाली ✋ (Wave Pivot)' },
+          { matra: 6, bol: 'Ka', devanagari: 'क', vibhag: 2, sign: '६', action: 'मात्रा ६', gesture: 'अंगुली ६' },
+          { matra: 7, bol: 'Dhi', devanagari: 'धी', vibhag: 2, sign: '७', action: 'मात्रा ७', gesture: 'अंगुली ७' },
+          { matra: 8, bol: 'Na', devanagari: 'ना', vibhag: 2, sign: '८', action: 'मात्रा ८', gesture: 'अंगुली ८' },
+        ]
+      }
+    };
+
+    let activeTalaName = 'Teental';
+    let activeTalaMeta = TALA_DICTIONARY.Teental;
+    let totalCycleMatras = 16;
+
+    const PILLAR_META = [
+      { key: 'laya_stability', label: 'Laya Sthirata', sub: 'Tempo Stability', color: '#166534' },
+      { key: 'sam_precision', label: 'Sam Precision', sub: 'Beat 1 Accuracy', color: '#b45309' },
+      { key: 'matra_synchrony', label: 'Matra Synchrony', sub: 'Rhythmic Jitter', color: '#78350f' },
+      { key: 'bol_accuracy', label: 'Bol Shuddhata', sub: 'Syllable Accuracy', color: '#9a3412' },
+    ];
+
+    const FEEDBACK_ICONS = {
+      EXCELLENT: '✅', INFO: 'ℹ️', WARNING: '⚠️', CRITICAL: '🚨'
+    };
+
+    // ── Screen Switching Helper ──────────────────────────────────────────────────
+    function switchScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    list.innerHTML = '';
-    data.recordings.forEach(rec => {
-      const item = document.createElement('div');
-      item.className = 'library-item';
-      item.innerHTML = `
+
+    // ── Refs ─────────────────────────────────────────────────────────────────────
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const selectedFile = document.getElementById('selectedFile');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loader = document.getElementById('loader');
+    const resultsContent = document.getElementById('resultsContent');
+    const backBtn = document.getElementById('backBtn');
+
+    let selectedFileObj = null;
+
+    // ── Back Button Handler ──────────────────────────────────────────────────────
+    backBtn.addEventListener('click', () => {
+      // Stop playback if running
+      if (playbackAudio) {
+        playbackAudio.pause();
+        playbackAudio = null;
+      }
+      if (playbackRAF) cancelAnimationFrame(playbackRAF);
+      switchScreen('homeScreen');
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════════
+    // AUDIO RECORDING
+    // ══════════════════════════════════════════════════════════════════════════════
+    const recordBtn = document.getElementById('recordBtn');
+    const recordLabel = document.getElementById('recordLabel');
+    const recordTimer = document.getElementById('recordTimer');
+    const recordWaveform = document.getElementById('recordWaveform');
+    const recordPreview = document.getElementById('recordPreview');
+    const recordedAudio = document.getElementById('recordedAudio');
+    const discardRecording = document.getElementById('discardRecording');
+    const useRecording = document.getElementById('useRecording');
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordingStartTime = null;
+    let recordingInterval = null;
+    let audioContext = null;
+    let analyserNode = null;
+    let waveformCtx = recordWaveform.getContext('2d');
+
+    recordBtn.addEventListener('click', async () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        // Stop recording
+        mediaRecorder.stop();
+        recordBtn.classList.remove('recording');
+        recordLabel.textContent = 'Recording complete!';
+        clearInterval(recordingInterval);
+        recordTimer.classList.remove('visible');
+        recordWaveform.classList.remove('visible');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+
+        // Waveform visualization
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        analyserNode = audioContext.createAnalyser();
+        analyserNode.fftSize = 256;
+        source.connect(analyserNode);
+
+        mediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const url = URL.createObjectURL(blob);
+          recordedAudio.src = url;
+          recordPreview.classList.add('visible');
+
+          // Store blob for upload
+          recordBtn._recordedBlob = blob;
+        };
+
+        mediaRecorder.start(250);
+        recordBtn.classList.add('recording');
+        recordLabel.textContent = 'Recording… Tap to stop';
+        recordingStartTime = Date.now();
+        recordTimer.classList.add('visible');
+        recordWaveform.classList.add('visible');
+
+        // Timer update
+        recordingInterval = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+          const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+          const secs = String(elapsed % 60).padStart(2, '0');
+          recordTimer.textContent = `${mins}:${secs}`;
+        }, 500);
+
+        // Draw waveform
+        drawRecordingWaveform();
+
+      } catch (err) {
+        recordLabel.textContent = '⚠️ Microphone access denied';
+        console.error('Mic error:', err);
+      }
+    });
+
+    function drawRecordingWaveform() {
+      if (!analyserNode || !mediaRecorder || mediaRecorder.state !== 'recording') return;
+      const bufLen = analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufLen);
+      analyserNode.getByteTimeDomainData(dataArray);
+
+      const canvas = recordWaveform;
+      const w = canvas.width = canvas.offsetWidth * 2;
+      const h = canvas.height = canvas.offsetHeight * 2;
+      waveformCtx.clearRect(0, 0, w, h);
+      waveformCtx.lineWidth = 2;
+      waveformCtx.strokeStyle = '#991b1b';
+      waveformCtx.beginPath();
+
+      const sliceW = w / bufLen;
+      let x = 0;
+      for (let i = 0; i < bufLen; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * h / 2;
+        i === 0 ? waveformCtx.moveTo(x, y) : waveformCtx.lineTo(x, y);
+        x += sliceW;
+      }
+      waveformCtx.lineTo(w, h / 2);
+      waveformCtx.stroke();
+      requestAnimationFrame(drawRecordingWaveform);
+    }
+
+    discardRecording.addEventListener('click', () => {
+      recordPreview.classList.remove('visible');
+      recordLabel.textContent = 'Tap to start recording your Kathak padhant';
+      recordBtn._recordedBlob = null;
+    });
+
+    useRecording.addEventListener('click', () => {
+      const blob = recordBtn._recordedBlob;
+      if (!blob) return;
+      selectedFileObj = new File([blob], 'live_recording.webm', { type: 'audio/webm' });
+      selectedFile.textContent = 'Selected: Live Recording 🎙️';
+      analyzeBtn.disabled = false;
+      recordPreview.classList.remove('visible');
+      recordLabel.textContent = '✅ Recording ready for analysis!';
+    });
+
+    // ── Library ───────────────────────────────────────────────────────────────────
+    async function loadLibrary() {
+      try {
+        const r = await fetch('/library');
+        const data = await r.json();
+        const list = document.getElementById('libraryList');
+        if (!data.recordings.length) {
+          list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">No recordings found in data/raw/</div>';
+          return;
+        }
+        list.innerHTML = '';
+        data.recordings.forEach(rec => {
+          const item = document.createElement('div');
+          item.className = 'library-item';
+          item.innerHTML = `
         <div>
           <div class="name">🎵 ${rec.filename}</div>
           <div class="size">${rec.size_kb} KB</div>
         </div>
         <audio controls src="${rec.url}"></audio>
       `;
-      // Click on item to load from server
-      item.querySelector('.name').addEventListener('click', () => loadLibraryFile(rec.filename));
-      list.appendChild(item);
-    });
-  } catch (e) {
-    console.error('Library load failed', e);
-  }
-}
-
-async function loadLibraryFile(filename) {
-  const res  = await fetch(`/audio/${filename}`);
-  const blob = await res.blob();
-  selectedFileObj = new File([blob], filename, { type: 'audio/wav' });
-  selectedFile.textContent = `Selected: ${filename}`;
-  analyzeBtn.disabled = false;
-}
-
-// ── File Input ────────────────────────────────────────────────────────────────
-fileInput.addEventListener('change', e => {
-  const f = e.target.files[0];
-  if (f) {
-    selectedFileObj = f;
-    selectedFile.textContent = `Selected: ${f.name}`;
-    analyzeBtn.disabled = false;
-  }
-});
-
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f) { selectedFileObj = f; selectedFile.textContent = `Selected: ${f.name}`; analyzeBtn.disabled = false; }
-});
-
-// ── Loader animation ──────────────────────────────────────────────────────────
-function setStage(idx) {
-  ['s1','s2','s3','s4'].forEach((id, i) => {
-    const el = document.getElementById(id);
-    el.classList.remove('active','done');
-    if (i < idx) el.classList.add('done');
-    else if (i === idx) el.classList.add('active');
-  });
-}
-
-// ── Analyze ───────────────────────────────────────────────────────────────────
-analyzeBtn.addEventListener('click', async () => {
-  if (!selectedFileObj) return;
-
-  // Reset
-  analyzeBtn.disabled = true;
-  results.classList.remove('visible');
-  loader.classList.add('visible');
-  setStage(0);
-
-  const stageTimers = [
-    setTimeout(()=>setStage(1), 2000),
-    setTimeout(()=>setStage(2), 4000),
-    setTimeout(()=>setStage(3), 6000),
-  ];
-
-  try {
-    const form = new FormData();
-    form.append('file', selectedFileObj);
-    const res  = await fetch('/analyze', { method:'POST', body: form });
-    stageTimers.forEach(clearTimeout);
-    setStage(4);
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.detail || 'Analysis failed');
+          item.querySelector('.name').addEventListener('click', () => loadLibraryFile(rec.filename));
+          list.appendChild(item);
+        });
+      } catch (e) {
+        console.error('Library load failed', e);
+      }
     }
 
-    const data = await res.json();
-    loader.classList.remove('visible');
-    renderResults(data);
-  } catch (e) {
-    loader.classList.remove('visible');
-    alert('Error: ' + e.message);
-  } finally {
-    analyzeBtn.disabled = false;
-  }
-});
+    async function loadLibraryFile(filename) {
+      const res = await fetch(`/audio/${filename}`);
+      const blob = await res.blob();
+      selectedFileObj = new File([blob], filename, { type: 'audio/wav' });
+      selectedFile.textContent = `Selected: ${filename}`;
+      analyzeBtn.disabled = false;
+    }
 
-// ── Render ─────────────────────────────────────────────────────────────────────
-function renderResults(d) {
-  const sc  = d.scorecard;
-  const tal = d.tala;
-  const bol = d.bols;
+    // ── File Input ────────────────────────────────────────────────────────────────
+    fileInput.addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (f) {
+        selectedFileObj = f;
+        selectedFile.textContent = `Selected: ${f.name}`;
+        analyzeBtn.disabled = false;
+      }
+    });
 
-  // Grade banner
-  document.getElementById('gradeTitle').textContent    = sc.title_award;
-  document.getElementById('gradeSubtitle').textContent = `${d.filename} · ${d.audio.duration_sec}s · ${tal.tempo_bpm} BPM (${tal.laya_category})`;
-  document.getElementById('gradeLetter').textContent   = sc.letter_grade;
-  document.getElementById('gradeScore').textContent    = `${sc.composite_score}%`;
-  document.getElementById('gradeCircle').style.setProperty('--pct', sc.composite_score);
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) { selectedFileObj = f; selectedFile.textContent = `Selected: ${f.name}`; analyzeBtn.disabled = false; }
+    });
 
-  // Pillars
-  const pg = document.getElementById('pillarsGrid');
-  pg.innerHTML = '';
-  PILLAR_META.forEach(m => {
-    const val = sc.pillars[m.key] ?? 0;
-    pg.innerHTML += `
+    // ── Loader animation ──────────────────────────────────────────────────────────
+    function setStage(idx) {
+      ['s1', 's2', 's3', 's4'].forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.classList.remove('active', 'done');
+        if (i < idx) el.classList.add('done');
+        else if (i === idx) el.classList.add('active');
+      });
+    }
+
+    // ── Carousel Logic ────────────────────────────────────────────────────────────
+    const track = document.getElementById('carouselTrack');
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const prevBtn = document.getElementById('prevSlideBtn');
+    const nextBtn = document.getElementById('nextSlideBtn');
+
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+
+    function updateCarousel(idx) {
+      currentSlide = Math.max(0, Math.min(idx, totalSlides - 1));
+      const slideWidth = slides[0].offsetWidth + 16;
+      track.scrollTo({ left: currentSlide * slideWidth, behavior: 'smooth' });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+      });
+    }
+
+    prevBtn.addEventListener('click', () => updateCarousel(currentSlide - 1));
+    nextBtn.addEventListener('click', () => updateCarousel(currentSlide + 1));
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => updateCarousel(i));
+    });
+
+    track.addEventListener('scroll', () => {
+      const slideWidth = slides[0].offsetWidth + 16;
+      const idx = Math.round(track.scrollLeft / slideWidth);
+      if (idx !== currentSlide && idx >= 0 && idx < totalSlides) {
+        currentSlide = idx;
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+      }
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════════
+    // AUDIO PLAYBACK + INTERACTIVE BOL SLIDER WITH TIME + KATHAK NOTATION SYNC
+    // ══════════════════════════════════════════════════════════════════════════════
+    let playbackAudio = null;
+    let playbackRAF = null;
+    let cachedAlignments = [];
+    let cachedExpectedGrid = [];
+    let audioDuration = 0;
+    let currentPlaybackRate = 1.0;
+    let currentActiveCycle = 1;
+    let totalAvartans = 1;
+    let cycleBoundaries = [];
+
+    const playBtn = document.getElementById('playBtn');
+    const sliderTrack = document.getElementById('sliderTrack');
+    const sliderFill = document.getElementById('sliderFill');
+    const sliderLine = document.getElementById('sliderLine');
+    const sliderThumb = document.getElementById('sliderThumb');
+    const sliderMarkersContainer = document.getElementById('sliderMarkersContainer');
+    const sliderStrikesContainer = document.getElementById('sliderStrikesContainer');
+    const playbackTime = document.getElementById('playbackTime');
+    const inspectorBol = document.getElementById('inspectorBol');
+    const inspectorBadge = document.getElementById('inspectorBadge');
+    const cycleSwitcherWrap = document.getElementById('cycleSwitcherWrap');
+    const cyclePillsList = document.getElementById('cyclePillsList');
+
+    function formatFineTime(sec) {
+      if (isNaN(sec) || sec < 0) sec = 0;
+      const m = Math.floor(sec / 60);
+      const s = (sec % 60).toFixed(1);
+      return `${m}:${s.padStart(4, '0')}`;
+    }
+
+    // Speed selector
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentPlaybackRate = parseFloat(btn.dataset.speed) || 1.0;
+        if (playbackAudio) {
+          playbackAudio.playbackRate = currentPlaybackRate;
+        }
+      });
+    });
+
+    function initPlayback(audioUrl, alignments, expectedGrid, duration, talaData) {
+      cachedAlignments = alignments || [];
+      cachedExpectedGrid = expectedGrid || [];
+      audioDuration = duration || 1.0;
+
+      if (talaData && talaData.name) {
+        const lookup = talaData.name.toLowerCase();
+        const matched = Object.keys(TALA_DICTIONARY).find(k =>
+          k.toLowerCase() === lookup ||
+          ((lookup.includes('jhap') || lookup.includes('zhap')) && k === 'Jhaptaal') ||
+          (lookup.includes('dadr') && k === 'Dadra') ||
+          (lookup.includes('kehr') && k === 'Kehrava')
+        );
+        if (matched) {
+          activeTalaName = matched;
+          activeTalaMeta = TALA_DICTIONARY[matched];
+          totalCycleMatras = talaData.total_matras || activeTalaMeta.matras;
+        }
+      }
+
+      // Calculate total avartans / cycles
+      totalAvartans = 1;
+      cachedAlignments.forEach(a => { if (a.cycle > totalAvartans) totalAvartans = a.cycle; });
+      cachedExpectedGrid.forEach(e => { if (e.cycle > totalAvartans) totalAvartans = e.cycle; });
+
+      // Compute time boundaries for each cycle using totalCycleMatras
+      cycleBoundaries = [];
+      const matraDur = (talaData && talaData.tempo_bpm) ? (60.0 / talaData.tempo_bpm) : 0.5;
+      for (let c = 1; c <= totalAvartans; c++) {
+        const startGlobal = (c - 1) * totalCycleMatras + 1;
+        const endGlobal = c * totalCycleMatras;
+        const firstBeat = cachedExpectedGrid.find(e => (e.global_matra || ((e.cycle - 1) * totalCycleMatras + e.matra)) === startGlobal);
+        const lastBeat = cachedExpectedGrid.find(e => (e.global_matra || ((e.cycle - 1) * totalCycleMatras + e.matra)) === endGlobal);
+        const nextFirst = cachedExpectedGrid.find(e => (e.global_matra || ((e.cycle - 1) * totalCycleMatras + e.matra)) === endGlobal + 1);
+
+        let startSec = firstBeat ? Math.max(0, firstBeat.target_time - (matraDur * 0.5)) : 0;
+        let endSec = nextFirst ? nextFirst.target_time : (lastBeat ? lastBeat.target_time + (matraDur * 0.5) : audioDuration);
+        if (c === totalAvartans) endSec = Math.max(endSec, audioDuration);
+
+        cycleBoundaries.push({ cycle: c, start: startSec, end: endSec, samTime: firstBeat ? firstBeat.target_time : 0 });
+      }
+
+      currentActiveCycle = 1;
+
+      if (playbackAudio) {
+        playbackAudio.pause();
+        playbackAudio = null;
+      }
+      if (playbackRAF) cancelAnimationFrame(playbackRAF);
+
+      playbackAudio = new Audio(audioUrl);
+      playbackAudio.preload = 'auto';
+      playbackAudio.playbackRate = currentPlaybackRate;
+
+      playbackAudio.addEventListener('loadedmetadata', () => {
+        if (playbackAudio.duration && !isNaN(playbackAudio.duration)) {
+          audioDuration = playbackAudio.duration;
+          if (cycleBoundaries.length > 0) {
+            cycleBoundaries[cycleBoundaries.length - 1].end = audioDuration;
+          }
+        }
+        playbackTime.textContent = `0:00.0 / ${formatFineTime(audioDuration)}`;
+        renderCycleSwitcher();
+        renderSliderMarkers();
+        renderSliderStrikes(currentActiveCycle);
+      });
+
+      playbackAudio.addEventListener('ended', () => {
+        playBtn.textContent = '▶';
+        cancelAnimationFrame(playbackRAF);
+      });
+
+      renderCycleSwitcher();
+      renderSliderMarkers();
+      renderSliderStrikes(currentActiveCycle);
+      playbackTime.textContent = `0:00.0 / ${formatFineTime(duration)}`;
+    }
+
+    function renderCycleSwitcher() {
+      if (!cycleSwitcherWrap || !cyclePillsList) return;
+      if (totalAvartans > 1) {
+        cycleSwitcherWrap.style.display = 'flex';
+        cyclePillsList.innerHTML = '';
+        for (let c = 1; c <= totalAvartans; c++) {
+          const startM = (c - 1) * totalCycleMatras + 1;
+          const endM = c * totalCycleMatras;
+          const btn = document.createElement('button');
+          btn.className = `cycle-pill-btn ${c === currentActiveCycle ? 'active' : ''}`;
+          btn.dataset.cycle = c;
+          btn.innerHTML = `🔄 आवर्तन ${c} <span style="font-size:0.7rem;opacity:0.85;">(मात्रा ${startM}–${endM})</span>`;
+          btn.addEventListener('click', () => {
+            selectCycle(c, true);
+          });
+          cyclePillsList.appendChild(btn);
+        }
+      } else {
+        cycleSwitcherWrap.style.display = 'none';
+      }
+    }
+
+    function selectCycle(cycleNum, shouldSeek) {
+      currentActiveCycle = cycleNum;
+      // Update pills
+      document.querySelectorAll('.cycle-pill-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.cycle, 10) === currentActiveCycle);
+      });
+      // Re-render strikes on the single slider
+      renderSliderStrikes(currentActiveCycle);
+
+      if (shouldSeek && playbackAudio) {
+        const b = cycleBoundaries.find(cb => cb.cycle === cycleNum);
+        if (b) {
+          playbackAudio.currentTime = b.start;
+          updatePlaybackUI();
+        }
+      }
+    }
+
+    // ── STRICTLY ONE CANONICAL SLIDER FOR ACTIVE TALA ──
+    function renderSliderMarkers() {
+      if (!sliderMarkersContainer) return;
+      sliderMarkersContainer.innerHTML = '';
+
+      // Update Slider Track Legend Header with active Tala specification
+      const sLeft = document.getElementById('sliderLegendLeft');
+      const sRight = document.getElementById('sliderLegendRight');
+      if (sLeft) {
+        sLeft.textContent = `◀ Canonical ${totalCycleMatras}-Matra ${activeTalaMeta.name} Bol Grid (The Correct Time)`;
+      }
+      if (sRight) {
+        sRight.textContent = `Your Strike Onsets (Early / Late Timing Error) ▶`;
+      }
+
+      // Vibhag divider partition lines based on active Tala's vibhag boundaries
+      let cumulative = 0;
+      const vibhags = activeTalaMeta.vibhags || [4, 4, 4, 4];
+      for (let i = 0; i < vibhags.length - 1; i++) {
+        cumulative += vibhags[i];
+        const pct = (cumulative / totalCycleMatras) * 100;
+        const divLine = document.createElement('div');
+        divLine.className = 'slider-vibhag-divider';
+        divLine.style.left = `${pct}%`;
+        divLine.title = `विभाग सीमा (Vibhag ${i + 2} Boundary)`;
+        sliderMarkersContainer.appendChild(divLine);
+      }
+
+      // Render EXACTLY the Canonical Matras for the active Tala (e.g. Jhaptaal 10 bols)
+      const matrasList = activeTalaMeta.matrasMeta;
+      matrasList.forEach(m => {
+        const pct = ((m.matra - 0.5) / totalCycleMatras) * 100;
+        const isSam = (m.matra === 1);
+        const isKhali = (m.action && m.action.includes('खाली')) || (m.sign === '०') || (activeTalaMeta.name === 'Jhaptaal' && m.matra === 6);
+
+        const marker = document.createElement('div');
+        marker.className = `canonical-bol-marker ${isSam ? 'sam' : (isKhali ? 'khali' : '')}`;
+        marker.style.left = `${pct}%`;
+        marker.dataset.matra = m.matra;
+
+        // Clean classical sign suffixes: only on boundary matras
+        let signSuffix = '';
+        if (m.matra === 1) {
+          signSuffix = ' (X)';
+        } else if (activeTalaMeta.name === 'Jhaptaal') {
+          if (m.matra === 3) signSuffix = ' (२)';
+          else if (m.matra === 6) signSuffix = ' (०)';
+          else if (m.matra === 8) signSuffix = ' (३)';
+        } else if (activeTalaMeta.name === 'Teental') {
+          if (m.matra === 5) signSuffix = ' (२)';
+          else if (m.matra === 9) signSuffix = ' (०)';
+          else if (m.matra === 13) signSuffix = ' (३)';
+        } else if (activeTalaMeta.name === 'Dadra') {
+          if (m.matra === 4) signSuffix = ' (०)';
+        } else if (activeTalaMeta.name === 'Kehrava') {
+          if (m.matra === 5) signSuffix = ' (०)';
+        }
+
+        marker.innerHTML = `
+          <span class="bol-chip-tag">${m.devanagari}${signSuffix}</span>
+          <span class="bol-matra-num">M${m.matra}</span>
+        `;
+        marker.title = `मात्रा ${m.matra}: ${m.devanagari} (${m.bol}) — ${m.action}`;
+
+        marker.addEventListener('click', (e) => {
+          e.stopPropagation();
+          seekToMatraInCurrentCycle(m.matra);
+        });
+
+        sliderMarkersContainer.appendChild(marker);
+      });
+    }
+
+    // Strike Pins for Current Active Cycle ONLY
+    function renderSliderStrikes(cycleNum) {
+      if (!sliderStrikesContainer) return;
+      sliderStrikesContainer.innerHTML = '';
+
+      const cycleAlignments = cachedAlignments.filter(a => a.cycle === cycleNum);
+      cycleAlignments.forEach(a => {
+        const pin = document.createElement('div');
+        const nominalPct = ((a.matra - 0.5) / totalCycleMatras) * 100;
+        let pinLeft = nominalPct;
+
+        if (a.actual_time !== null && !a.missed) {
+          let statusCls = 'on-beat';
+          if (a.status === 'EARLY_RUSHING') statusCls = 'early';
+          else if (a.status === 'LATE_DRAGGING') statusCls = 'late';
+          pin.className = `user-strike-pin ${statusCls}`;
+
+          if (a.offset_ms !== null) {
+            const shiftPct = Math.max(-2.2, Math.min(2.2, (a.offset_ms / 600) * 3));
+            pinLeft += shiftPct;
+          }
+          pin.title = `Strike on Matra ${(cycleNum - 1) * totalCycleMatras + a.matra} (Cycle ${cycleNum}): ${a.status} (${a.offset_ms > 0 ? '+' : ''}${Math.round(a.offset_ms)}ms) @ ${a.actual_time.toFixed(2)}s`;
+        } else {
+          pin.className = 'user-strike-pin missed';
+          pin.title = `Matra ${(cycleNum - 1) * totalCycleMatras + a.matra} (Cycle ${cycleNum}): Beat Missed`;
+        }
+
+        pin.style.left = `${pinLeft}%`;
+        sliderStrikesContainer.appendChild(pin);
+      });
+    }
+
+    function seekToMatraInCurrentCycle(matraNum) {
+      const target = cachedExpectedGrid.find(e => e.cycle === currentActiveCycle && e.matra === matraNum)
+        || cachedAlignments.find(a => a.cycle === currentActiveCycle && a.matra === matraNum);
+      if (target) {
+        seekToTime(target.target_time);
+      }
+    }
+
+    function seekToTime(targetSec) {
+      if (!playbackAudio) return;
+      playbackAudio.currentTime = Math.max(0, Math.min(targetSec, audioDuration));
+      if (playbackAudio.paused) {
+        playbackAudio.play();
+        playBtn.textContent = '⏸';
+      }
+      updatePlaybackUI();
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (!playbackAudio) return;
+      if (playbackAudio.paused) {
+        playbackAudio.play();
+        playBtn.textContent = '⏸';
+        updatePlaybackUI();
+      } else {
+        playbackAudio.pause();
+        playBtn.textContent = '▶';
+        cancelAnimationFrame(playbackRAF);
+      }
+    });
+
+    // Slider scrubbing: scrubs within current active cycle
+    let isDraggingSlider = false;
+    function handleSliderScrub(e) {
+      if (!playbackAudio || audioDuration <= 0) return;
+      const rect = sliderTrack.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+
+      const b = cycleBoundaries.find(cb => cb.cycle === currentActiveCycle) || { start: 0, end: audioDuration };
+      playbackAudio.currentTime = b.start + pct * (b.end - b.start);
+      updatePlaybackUI();
+    }
+
+    sliderTrack.addEventListener('mousedown', (e) => {
+      isDraggingSlider = true;
+      handleSliderScrub(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDraggingSlider) handleSliderScrub(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDraggingSlider = false;
+    });
+
+    function updatePlaybackUI() {
+      if (!playbackAudio) return;
+      const current = playbackAudio.currentTime;
+      playbackTime.textContent = `${formatFineTime(current)} / ${formatFineTime(audioDuration)}`;
+
+      // 1. Detect active matra across all beats
+      let activeMatra = null;
+      let minDelta = Infinity;
+      const candidates = cachedAlignments.length ? cachedAlignments : cachedExpectedGrid;
+      candidates.forEach(c => {
+        const delta = Math.abs(current - c.target_time);
+        if (delta < minDelta && delta <= 0.6) {
+          minDelta = delta;
+          activeMatra = c;
+        }
+      });
+
+      // 2. Auto-sync cycle if playback crossed into next cycle
+      if (activeMatra && activeMatra.cycle !== currentActiveCycle) {
+        selectCycle(activeMatra.cycle, false);
+      }
+
+      // 3. Update single slider progress needle
+      const b = cycleBoundaries.find(cb => cb.cycle === currentActiveCycle) || { start: 0, end: audioDuration };
+      const cycleSpan = Math.max(0.1, b.end - b.start);
+      const cyclePct = Math.max(0, Math.min(100, ((current - b.start) / cycleSpan) * 100));
+
+      sliderFill.style.width = `${cyclePct}%`;
+      sliderLine.style.left = `${cyclePct}%`;
+      sliderThumb.style.left = `${cyclePct}%`;
+
+      // 4. Highlight the SINGLE active marker on the slider
+      const activeMatraNum = activeMatra ? activeMatra.matra : null;
+      const markers = sliderMarkersContainer.querySelectorAll('.canonical-bol-marker');
+      markers.forEach(m => {
+        if (activeMatraNum !== null && parseInt(m.dataset.matra, 10) === activeMatraNum) {
+          m.classList.add('active');
+        } else {
+          m.classList.remove('active');
+        }
+      });
+
+      // 5. Highlight the SINGLE active cell in the Analysis Rows below (continuous counter)
+      const activeGlobalMatra = activeMatra
+        ? (activeMatra.global_matra || ((activeMatra.cycle - 1) * totalCycleMatras + activeMatra.matra))
+        : null;
+
+      const cells = document.querySelectorAll('.kathak-matra-cell');
+      cells.forEach(c => {
+        if (activeGlobalMatra !== null && parseInt(c.dataset.globalMatra, 10) === activeGlobalMatra) {
+          c.classList.add('active-matra');
+        } else {
+          c.classList.remove('active-matra');
+        }
+      });
+
+      // 6. Update Live Inspector Banner
+      if (activeMatra) {
+        const meta = activeTalaMeta.matrasMeta[activeMatra.matra - 1] || {};
+        const cycleText = activeMatra.cycle > 1 ? ` • आवर्तन ${activeMatra.cycle}` : '';
+        const devanagariBol = meta.devanagari || activeMatra.bol || '';
+        const romanBol = meta.bol || activeMatra.bol || '';
+        const actionText = meta.action || activeMatra.action || '';
+
+        inspectorBol.innerHTML = `
+          <span>🎯</span>
+          <span><strong>मात्रा ${activeGlobalMatra} (${devanagariBol} / ${romanBol})</strong> • ${actionText}${cycleText} • Ideal Beat @ ${activeMatra.target_time.toFixed(2)}s</span>
+        `;
+
+        if (activeMatra.status === 'ON_BEAT') {
+          inspectorBadge.className = 'inspector-status-badge on-beat';
+          inspectorBadge.innerHTML = `<span>✓</span> <span>समताल On-Beat (${activeMatra.offset_ms !== null ? (activeMatra.offset_ms > 0 ? '+' : '') + Math.round(activeMatra.offset_ms) + 'ms' : '0ms'})</span>`;
+        } else if (activeMatra.status === 'EARLY_RUSHING') {
+          inspectorBadge.className = 'inspector-status-badge early';
+          inspectorBadge.innerHTML = `<span>⚡</span> <span>द्रुत Rushing (${Math.round(activeMatra.offset_ms)}ms) — Pacing too fast</span>`;
+        } else if (activeMatra.status === 'LATE_DRAGGING') {
+          inspectorBadge.className = 'inspector-status-badge late';
+          inspectorBadge.innerHTML = `<span>⏳</span> <span>विलम्बित Dragging (+${Math.round(activeMatra.offset_ms)}ms) — Behind the beat</span>`;
+        } else if (activeMatra.missed) {
+          inspectorBadge.className = 'inspector-status-badge missed';
+          inspectorBadge.innerHTML = `<span>✕</span> <span>अनाघात Skipped Beat — No strike detected</span>`;
+        } else {
+          inspectorBadge.className = 'inspector-status-badge on-beat';
+          inspectorBadge.innerHTML = `<span>•</span> <span>In Laya Grid</span>`;
+        }
+      } else {
+        const firstMatra = cachedExpectedGrid[0];
+        if (firstMatra && current < (firstMatra.target_time - 0.25)) {
+          inspectorBol.innerHTML = `
+            <span>⏳</span>
+            <span><strong>प्रारंभिक मौन (Lead-in Silence)</strong> • Bol Grid anchors to first spoken bol @ ${firstMatra.target_time.toFixed(2)}s</span>
+          `;
+          inspectorBadge.className = 'inspector-status-badge';
+          inspectorBadge.innerHTML = `<span>🔇</span> <span>मौन (Silence)</span>`;
+        }
+      }
+
+      if (!playbackAudio.paused) {
+        playbackRAF = requestAnimationFrame(updatePlaybackUI);
+      }
+    }
+
+    // ── Analyze ───────────────────────────────────────────────────────────────────
+    analyzeBtn.addEventListener('click', async () => {
+      if (!selectedFileObj) return;
+
+      switchScreen('resultsScreen');
+      loader.classList.add('visible');
+      resultsContent.style.display = 'none';
+      document.getElementById('currentFilenameBadge').textContent = `File: ${selectedFileObj.name}`;
+      setStage(0);
+
+      const stageTimers = [
+        setTimeout(() => setStage(1), 2000),
+        setTimeout(() => setStage(2), 4000),
+        setTimeout(() => setStage(3), 6000),
+      ];
+
+      try {
+        const form = new FormData();
+        form.append('file', selectedFileObj);
+        const chosenTaal = document.getElementById('taalSelector') ? document.getElementById('taalSelector').value : 'Auto';
+        form.append('taal', chosenTaal);
+
+        const res = await fetch('/analyze', { method: 'POST', body: form });
+        stageTimers.forEach(clearTimeout);
+        setStage(4);
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Analysis failed');
+        }
+
+        const data = await res.json();
+        loader.classList.remove('visible');
+        renderResults(data);
+        resultsContent.style.display = 'block';
+      } catch (e) {
+        loader.classList.remove('visible');
+        alert('Error: ' + e.message);
+        switchScreen('homeScreen');
+      }
+    });
+
+    // ── Render Results ─────────────────────────────────────────────────────────────
+    function renderResults(d) {
+      const sc = d.scorecard;
+      const tal = d.tala;
+      const bol = d.bols;
+
+      // Configure Active Tala with robust matching
+      const rawName = tal && tal.name ? tal.name : 'Teental';
+      const cleanKey = Object.keys(TALA_DICTIONARY).find(k =>
+        k.toLowerCase() === rawName.toLowerCase() ||
+        ((rawName.toLowerCase().includes('jhap') || rawName.toLowerCase().includes('zhap')) && k === 'Jhaptaal') ||
+        (rawName.toLowerCase().includes('dadr') && k === 'Dadra') ||
+        (rawName.toLowerCase().includes('kehr') && k === 'Kehrava')
+      ) || 'Teental';
+
+      activeTalaName = cleanKey;
+      activeTalaMeta = TALA_DICTIONARY[cleanKey];
+      totalCycleMatras = (tal && tal.total_matras) ? tal.total_matras : activeTalaMeta.matras;
+
+      document.getElementById('gradeTitle').textContent = sc.title_award;
+      document.getElementById('gradeSubtitle').textContent = `${d.filename} · ${d.audio.duration_sec}s · ${tal.tempo_bpm} BPM (${tal.laya_category})`;
+      document.getElementById('gradeLetter').textContent = sc.letter_grade;
+      document.getElementById('gradeScore').textContent = `${sc.composite_score}%`;
+      document.getElementById('gradeCircle').style.setProperty('--pct', sc.composite_score);
+
+      // Active / Detected Tala Banner
+      const detTitle = document.getElementById('detectedTalaTitle');
+      const detSub = document.getElementById('detectedTalaSub');
+      const detBadge = document.getElementById('detectedTalaBadge');
+      if (detTitle && detSub && detBadge) {
+        detTitle.textContent = `${tal.display_name || activeTalaMeta.display} • संरचना: ${tal.structure || activeTalaMeta.structure}`;
+        detSub.textContent = `पहचाना गया ताल (Tala Match: ${tal.confidence || 95}%) • ${totalCycleMatras} मात्रा, ${tal.vibhags ? tal.vibhags.length : activeTalaMeta.vibhags.length} विभाग (${(tal.vibhags || activeTalaMeta.vibhags).join('+')})`;
+        detBadge.textContent = `✨ ${activeTalaMeta.name} Active`;
+      }
+
+      // Slider Legend & Shastra Banner
+      const sLeft = document.getElementById('sliderLegendLeft');
+      const sRight = document.getElementById('sliderLegendRight');
+      if (sLeft) {
+        sLeft.textContent = `◀ Canonical ${totalCycleMatras}-Matra ${activeTalaMeta.name} Bol Grid (The Correct Time)`;
+      }
+      if (sRight) {
+        sRight.textContent = `Your Strike Onsets (Early / Late Timing Error) ▶`;
+      }
+
+      const shTitle = document.getElementById('shastraTitleText');
+      if (shTitle) {
+        shTitle.textContent = activeTalaMeta.shastraTitle;
+      }
+      const shRules = document.getElementById('shastraRules');
+      if (shRules) {
+        shRules.innerHTML = activeTalaMeta.rules.map(r =>
+          `<span class="rule-chip ${r.cls}">${r.text}</span>`
+        ).join('');
+      }
+
+      // 4 Pillars
+      const pg = document.getElementById('pillarsGrid');
+      pg.innerHTML = '';
+      PILLAR_META.forEach(m => {
+        const val = sc.pillars[m.key] ?? 0;
+        pg.innerHTML += `
       <div class="pillar-card">
         <div class="pillar-label">${m.label}</div>
         <div class="pillar-val" style="color:${m.color}">${val}%</div>
-        <div style="font-size:.72rem;color:var(--muted)">${m.sub}</div>
+        <div style="font-size:.7rem;color:var(--muted)">${m.sub}</div>
         <div class="pillar-bar"><div class="pillar-fill" style="width:${val}%;background:${m.color}"></div></div>
       </div>`;
-  });
+      });
 
-  // Tala chips
-  const chips = document.getElementById('talaChips');
-  chips.innerHTML = [
-    ['Tempo', `${tal.tempo_bpm} BPM`],
-    ['Laya', tal.laya_category],
-    ['Matched Matras', `${tal.matched_matras} / ${tal.total_matras}`],
-    ['Mean Error', `${tal.mean_abs_error_ms} ms`],
-    ['Jitter', `${tal.timing_jitter_ms} ms`],
-    tal.sam_offset_ms !== null ? ['Sam Offset', `${tal.sam_offset_ms > 0 ? '+' : ''}${tal.sam_offset_ms} ms`] : null,
-  ].filter(Boolean).map(([l,v]) => `<div class="tala-chip"><span style="color:var(--muted);font-size:.7rem">${l} </span>${v}</div>`).join('');
+      // Tala chips
+      const chips = document.getElementById('talaChips');
+      chips.innerHTML = [
+        ['Taal', tal.display_name || activeTalaMeta.display],
+        ['Tempo', `${tal.tempo_bpm} BPM`],
+        ['Laya', tal.laya_category],
+        ['Matched Matras', `${tal.matched_matras} / ${tal.total_grid_matras || tal.total_matras}`],
+        ['Mean Error', `${tal.mean_abs_error_ms} ms`],
+        ['Jitter', `${tal.timing_jitter_ms} ms`],
+        tal.sam_offset_ms !== null ? ['Sam Offset', `${tal.sam_offset_ms > 0 ? '+' : ''}${tal.sam_offset_ms} ms`] : null,
+      ].filter(Boolean).map(([l, v]) => `<div class="tala-chip"><span style="color:var(--muted);font-size:.7rem">${l}: </span><strong>${v}</strong></div>`).join('');
 
-  // Matra grid
-  const mg = document.getElementById('matraGrid');
-  mg.innerHTML = '';
-  for (let i = 1; i <= 16; i++) {
-    const cls = MATRA_ACTIONS[i] ?? '';
-    const bol_nm = TEENTAL_BOLS[i-1];
-    mg.innerHTML += `<div class="matra-cell ${cls}" title="Matra ${i}: ${bol_nm}"><div class="matra-num">${i}</div><div class="matra-bol">${bol_nm}</div></div>`;
-  }
+      // ── Authentic Kathak Vibhag Visualization (भातखंडे ताल लिपि) ──
+      const container = document.getElementById('vibhagsContainer') || document.getElementById('vibhagsGrid');
+      container.innerHTML = '';
 
-  // Bols
-  document.getElementById('bolCount').textContent = `${bol.detected_count} bols detected · matched ${bol.matched_repertoire} (${bol.similarity_score}%)`;
-  const bt = document.getElementById('bolTokens');
-  bt.innerHTML = '';
-  (bol.tokens || []).slice(0, 80).forEach((t,i) => {
-    const span = document.createElement('span');
-    span.className = 'bol-token';
-    span.style.animationDelay = `${i * 0.025}s`;
-    span.textContent = t;
-    bt.appendChild(span);
-  });
-  document.getElementById('transcript').textContent = bol.raw_transcript || '—';
+      const allAlignments = tal.grid_alignments || [];
+      const allExpected = tal.expected_grid || [];
 
-  // Feedback
-  const fl = document.getElementById('feedbackList');
-  fl.innerHTML = '';
-  sc.feedback.forEach(f => {
-    fl.innerHTML += `
+      // Determine total number of cycles (Avartans)
+      let maxCycle = tal.total_cycles || 1;
+      allAlignments.forEach(a => { if (a.cycle > maxCycle) maxCycle = a.cycle; });
+      allExpected.forEach(e => { if (e.cycle > maxCycle) maxCycle = e.cycle; });
+
+      // Build lookup maps keyed by unique global_matra
+      const alignMapByGlobal = {};
+      allAlignments.forEach(a => {
+        const g = a.global_matra || ((a.cycle - 1) * totalCycleMatras + a.matra);
+        alignMapByGlobal[g] = a;
+      });
+
+      const expectedMapByGlobal = {};
+      allExpected.forEach(e => {
+        const g = e.global_matra || ((e.cycle - 1) * totalCycleMatras + e.matra);
+        expectedMapByGlobal[g] = e;
+      });
+
+      for (let c = 1; c <= maxCycle; c++) {
+        const startMatra = (c - 1) * totalCycleMatras + 1;
+        const endMatra = c * totalCycleMatras;
+
+        const avartanBlock = document.createElement('div');
+        avartanBlock.className = 'avartan-block';
+
+        // Avartan Cycle Header
+        const firstBeat = expectedMapByGlobal[startMatra] || alignMapByGlobal[startMatra];
+        const timeNote = firstBeat ? ` • Start: ${firstBeat.target_time.toFixed(2)}s` : '';
+
+        const avartanHdr = document.createElement('div');
+        avartanHdr.className = 'avartan-hdr';
+        avartanHdr.innerHTML = `
+          <div class="avartan-hdr-left">
+            <span class="avartan-badge">🔄 आवर्तन ${c} (Cycle ${c})</span>
+            <span class="avartan-range">मात्रा ${startMatra} – ${endMatra} (Beats ${startMatra}–${endMatra})</span>
+          </div>
+          <div class="avartan-hdr-right">
+            <span>${totalCycleMatras} मात्रा ${activeTalaMeta.display} चक्र${timeNote}</span>
+          </div>
+        `;
+        avartanBlock.appendChild(avartanHdr);
+
+        // Vibhags Grid for this cycle (columns strictly match number of vibhags in this Tala)
+        const vibhagsGrid = document.createElement('div');
+        vibhagsGrid.className = 'vibhags-grid';
+        vibhagsGrid.style.gridTemplateColumns = `repeat(${activeTalaMeta.vibhagDefs.length}, 1fr)`;
+
+        activeTalaMeta.vibhagDefs.forEach(v => {
+          const card = document.createElement('div');
+          card.className = `vibhag-card ${v.cls}-vibhag`;
+
+          // Vibhag Header
+          const hdr = document.createElement('div');
+          hdr.className = 'vibhag-card-hdr';
+          hdr.innerHTML = `
+            <div class="vibhag-title-wrap">
+              <div class="vibhag-hdr-title">${v.name} — ${v.label}</div>
+              <div class="vibhag-hdr-kriya">${v.kriya}</div>
+            </div>
+            <div class="vibhag-sign-badge ${v.cls}" title="Tala Sign: ${v.sign}">${v.sign}</div>
+          `;
+          card.appendChild(hdr);
+
+          // Cells container
+          const cellsDiv = document.createElement('div');
+          cellsDiv.className = 'vibhag-cells-container';
+
+          v.matras.forEach(m => {
+            const globalMatra = (c - 1) * totalCycleMatras + m;
+            const meta = activeTalaMeta.matrasMeta[m - 1] || {};
+            const a = alignMapByGlobal[globalMatra];
+            const exp = expectedMapByGlobal[globalMatra];
+            const targetTime = a ? a.target_time : (exp ? exp.target_time : null);
+            const isPastAudio = (!a && !exp);
+
+            const cell = document.createElement('div');
+            cell.className = 'kathak-matra-cell' + (isPastAudio ? ' past-audio' : '');
+            cell.dataset.globalMatra = globalMatra;
+            cell.dataset.cycle = c;
+            cell.dataset.matra = m;
+            cell.title = targetTime !== null
+              ? `Click to listen to Matra ${globalMatra} (Cycle ${c}, Beat ${m}): ${meta.devanagari || ''} (${meta.bol || ''}) @ ${targetTime.toFixed(2)}s`
+              : `Matra ${globalMatra} (${meta.bol || ''}): Audio ended before this beat`;
+
+            let diagBadgeHTML = `<div class="diag-pill" style="color:var(--muted)">मात्रा समय</div>`;
+            if (isPastAudio) {
+              diagBadgeHTML = `<div class="diag-pill" style="color:var(--muted);opacity:0.5">—</div>`;
+            } else if (a) {
+              if (a.status === 'ON_BEAT') {
+                const offStr = a.offset_ms !== null ? (a.offset_ms > 0 ? '+' : '') + Math.round(a.offset_ms) + 'ms' : '0ms';
+                diagBadgeHTML = `<div class="diag-pill on-beat" title="Offset: ${offStr}">✓ समताल (${offStr})</div>`;
+              } else if (a.status === 'EARLY_RUSHING') {
+                diagBadgeHTML = `<div class="diag-pill early" title="Early: ${Math.round(a.offset_ms)}ms">⚡ द्रुत (${Math.round(a.offset_ms)}ms)</div>`;
+              } else if (a.status === 'LATE_DRAGGING') {
+                diagBadgeHTML = `<div class="diag-pill late" title="Late: +${Math.round(a.offset_ms)}ms">⏳ विलम्बित (+${Math.round(a.offset_ms)}ms)</div>`;
+              } else if (a.missed) {
+                diagBadgeHTML = `<div class="diag-pill missed" title="Missed onset strike">✕ अनाघात Skipped</div>`;
+              }
+            }
+
+            cell.innerHTML = `
+              <div class="matra-cell-left">
+                <div class="matra-index-badge">मा. ${globalMatra}</div>
+                <div class="matra-bol-info">
+                  <div class="matra-bol-dev">${meta.devanagari || ''}</div>
+                  <div class="matra-bol-rom">${meta.bol || ''} (${meta.action || ''})</div>
+                </div>
+              </div>
+              <div class="matra-cell-right">
+                ${diagBadgeHTML}
+                <div class="matra-gesture-note">${meta.gesture || ''}</div>
+              </div>
+            `;
+
+            // Clicking seeks playback to this exact matra
+            if (!isPastAudio && targetTime !== null && targetTime !== undefined) {
+              cell.addEventListener('click', () => {
+                seekToTime(targetTime);
+              });
+            }
+
+            cellsDiv.appendChild(cell);
+          });
+
+          card.appendChild(cellsDiv);
+          vibhagsGrid.appendChild(card);
+        });
+
+        avartanBlock.appendChild(vibhagsGrid);
+        container.appendChild(avartanBlock);
+      }
+
+      // ── Audio Playback Init (Local ObjectURL or Remote Playback URL) ──
+      let audioSrc = d.audio.playback_url;
+      if (selectedFileObj) {
+        try {
+          audioSrc = URL.createObjectURL(selectedFileObj);
+        } catch (e) {
+          console.warn('Could not create ObjectURL, using server playback_url', e);
+        }
+      }
+      if (audioSrc) {
+        initPlayback(audioSrc, tal.grid_alignments || [], tal.expected_grid || [], d.audio.duration_sec, tal);
+      }
+
+      // Bols
+      document.getElementById('bolCount').textContent = `${bol.detected_count} bols detected · matched ${bol.matched_repertoire} (${bol.similarity_score}%)`;
+      const bt = document.getElementById('bolTokens');
+      bt.innerHTML = '';
+      (bol.tokens || []).slice(0, 80).forEach((t) => {
+        const span = document.createElement('span');
+        span.className = 'bol-token';
+        span.textContent = t;
+        bt.appendChild(span);
+      });
+      document.getElementById('transcript').textContent = bol.raw_transcript || '—';
+
+      // Feedback
+      const fl = document.getElementById('feedbackList');
+      fl.innerHTML = '';
+      sc.feedback.forEach(f => {
+        fl.innerHTML += `
       <div class="feedback-item ${f.severity}">
         <span class="feedback-icon">${FEEDBACK_ICONS[f.severity] || '•'}</span>
         <div>
@@ -694,25 +3163,21 @@ function renderResults(d) {
           <div>${f.message}</div>
         </div>
       </div>`;
-  });
+      });
 
-  // Plots
-  const plots = d.plots;
-  if (plots.features) document.getElementById('plotFeatures').src = `data:image/png;base64,${plots.features}`;
-  if (plots.tala)     document.getElementById('plotTala').src     = `data:image/png;base64,${plots.tala}`;
-  if (plots.bols)     document.getElementById('plotBols').src     = `data:image/png;base64,${plots.bols}`;
-  if (plots.report)   document.getElementById('plotReport').src   = `data:image/png;base64,${plots.report}`;
+      // Plots
+      const plots = d.plots;
+      if (plots.features) document.getElementById('plotFeatures').src = `data:image/png;base64,${plots.features}`;
+      if (plots.tala) document.getElementById('plotTala').src = `data:image/png;base64,${plots.tala}`;
+      if (plots.bols) document.getElementById('plotBols').src = `data:image/png;base64,${plots.bols}`;
+      if (plots.report) document.getElementById('plotReport').src = `data:image/png;base64,${plots.report}`;
 
-  // Proc time
-  document.getElementById('procTime').textContent = `Analysis completed in ${d.processing_time_sec}s`;
+      document.getElementById('procTime').textContent = `Analysis completed in ${d.processing_time_sec}s`;
+    }
 
-  // Show
-  results.classList.add('visible');
-  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// ── Boot ──────────────────────────────────────────────────────────────────────
-loadLibrary();
-</script>
+    // ── Boot ──────────────────────────────────────────────────────────────────────
+    loadLibrary();
+  </script>
 </body>
+
 </html>

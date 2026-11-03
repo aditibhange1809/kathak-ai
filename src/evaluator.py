@@ -33,13 +33,16 @@ if str(PROJECT_DIR) not in sys.path:
 from src.features import extract_features
 from src.tala import (
     estimate_tempo_and_beats,
+    generate_tala_grid,
     generate_teental_grid,
     quantize_onsets_to_grid,
     compute_laya_analytics,
+    TAAL_DEFINITIONS,
 )
 from src.bol_aligner import (
     transcribe_kathak_audio,
     identify_closest_composition,
+    identify_taal,
     align_bol_sequences,
     CANONICAL_COMPOSITIONS,
 )
@@ -47,7 +50,7 @@ from src.bol_aligner import (
 
 @dataclass
 class DiagnosticFeedback:
-    category: str  # 'SAM', 'LAYA', 'RHYTHM', 'BOLS'
+    category: str  # 'SAM', 'LAYA', 'RHYTHM', 'BOLS', 'JHAPTAAL_SHASTRA', 'DADRA_SHASTRA', 'KEHRAVA_SHASTRA'
     severity: str  # 'EXCELLENT', 'INFO', 'WARNING', 'CRITICAL'
     message: str
     timestamp: Optional[float] = None
@@ -60,14 +63,19 @@ class PerformanceScorecard:
     tempo_bpm: float
     laya_category: str
     matched_repertoire: str
+    # Tala details
+    taal_name: str = "Teental"
+    taal_display: str = "तीनताल (Teental)"
+    taal_structure: str = "4 + 4 + 4 + 4"
+    taal_confidence: float = 90.0
     # Pillar Scores (0 to 100)
-    laya_stability_score: float
-    sam_precision_score: float
-    rhythmic_synchrony_score: float
-    bol_accuracy_score: float
-    composite_score: float
-    letter_grade: str
-    title_award: str
+    laya_stability_score: float = 0.0
+    sam_precision_score: float = 0.0
+    rhythmic_synchrony_score: float = 0.0
+    bol_accuracy_score: float = 0.0
+    composite_score: float = 0.0
+    letter_grade: str = "B"
+    title_award: str = "Madhyama"
     feedback_items: List[DiagnosticFeedback] = field(default_factory=list)
 
 
@@ -99,9 +107,12 @@ class KathakEvaluator:
         self,
         audio_path: Path,
         target_composition_name: Optional[str] = None,
+        target_taal: Optional[str] = None,
     ) -> Tuple[PerformanceScorecard, Dict]:
         """
         Runs comprehensive analysis and grades performance across the 4 pillars.
+        Supports multi-Tala tracking (Teental, Jhaptaal, Kehrava, Dadra) with
+        automatic Tala inference and classical Shastra rubric evaluation.
         """
         if not audio_path.is_file():
             raise FileNotFoundError(f"Audio file not found at: {audio_path}")
@@ -110,42 +121,94 @@ class KathakEvaluator:
         duration = len(audio) / sr
 
         # -------------------------------------------------------------
-        # 1. Tala & Rhythm Tracking
-        # -------------------------------------------------------------
-        tempo_bpm, beat_times, onset_times = estimate_tempo_and_beats(audio, sr)
-        t0 = beat_times[0] if len(beat_times) > 0 else (onset_times[0] if len(onset_times) > 0 else 0.0)
-        grid = generate_teental_grid(t0=t0, tempo_bpm=tempo_bpm, total_duration=duration)
-        alignment_data = quantize_onsets_to_grid(onset_times, grid)
-        tala_metrics = compute_laya_analytics(tempo_bpm, alignment_data)
-
-        # -------------------------------------------------------------
-        # 2. Bol Transcription & Alignment
+        # 1. Bol Transcription & Tala Identification
         # -------------------------------------------------------------
         bol_events, raw_transcript = transcribe_kathak_audio(audio_path)
         detected_tokens = [b.token for b in bol_events]
 
+        # Determine active Tala (explicit override or auto-detected from bols)
+        if target_taal and target_taal in TAAL_DEFINITIONS and target_taal != "Auto":
+            active_taal = target_taal
+            taal_confidence = 100.0
+        else:
+            detected_taal, auto_conf = identify_taal(detected_tokens)
+            active_taal = detected_taal
+            taal_confidence = auto_conf
+
+        taal_spec = TAAL_DEFINITIONS.get(active_taal, TAAL_DEFINITIONS["Teental"])
+
+        # -------------------------------------------------------------
+        # 2. Tala & Rhythm Tracking on Active Tala Grid
+        # -------------------------------------------------------------
+        tempo_bpm, beat_times, onset_times = estimate_tempo_and_beats(audio, sr)
+
+        # Anchor t0 strictly to the first detected spoken bol or acoustic onset
+        # (avoid starting the canonical grid during silence or dead lead-in)
+        if len(bol_events) > 0:
+            first_bol_start = float(bol_events[0].start)
+            # Look for acoustic onsets in close proximity (±350ms) to the first spoken bol
+            candidate_onsets = [float(o) for o in onset_times if abs(o - first_bol_start) <= 0.35]
+            if candidate_onsets:
+                # Snap to the closest onset to the first spoken bol
+                t0 = float(min(candidate_onsets, key=lambda o: abs(o - first_bol_start)))
+            else:
+                t0 = first_bol_start
+        else:
+            # Fallback if no bols detected: find first acoustic onset with real energy above silence
+            hop_len = 512
+            rms = librosa.feature.rms(y=audio, hop_length=hop_len)[0]
+            rms_times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop_len)
+            noise_floor = float(np.percentile(rms, 25)) if len(rms) > 0 else 0.001
+            rms_thresh = max(0.015, noise_floor * 2.5)
+
+            active_onsets = []
+            for o in onset_times:
+                idx = np.argmin(np.abs(rms_times - o))
+                if rms[idx] >= rms_thresh:
+                    active_onsets.append(float(o))
+
+            if active_onsets:
+                t0 = active_onsets[0]
+            elif len(beat_times) > 0:
+                t0 = float(beat_times[0])
+            elif len(onset_times) > 0:
+                t0 = float(onset_times[0])
+            else:
+                t0 = 0.0
+
+        grid = generate_tala_grid(t0=t0, tempo_bpm=tempo_bpm, total_duration=duration, taal_name=active_taal)
+        alignment_data = quantize_onsets_to_grid(onset_times, grid)
+        tala_metrics = compute_laya_analytics(tempo_bpm, alignment_data)
+
+        # -------------------------------------------------------------
+        # 3. Bol Repertoire Alignment
+        # -------------------------------------------------------------
         if target_composition_name and target_composition_name in CANONICAL_COMPOSITIONS:
             best_repertoire = target_composition_name
             bol_alignment = align_bol_sequences(detected_tokens, CANONICAL_COMPOSITIONS[best_repertoire])
         else:
             best_repertoire, bol_alignment = identify_closest_composition(detected_tokens)
+            taal_theka_name = f"{active_taal}_Theka"
+            if taal_theka_name in CANONICAL_COMPOSITIONS and not best_repertoire.startswith(active_taal):
+                theka_align = align_bol_sequences(detected_tokens, CANONICAL_COMPOSITIONS[taal_theka_name])
+                if theka_align["similarity_score"] >= bol_alignment["similarity_score"] - 20.0:
+                    best_repertoire = taal_theka_name
+                    bol_alignment = theka_align
 
         # -------------------------------------------------------------
-        # 3. Pillar 1: Laya Sthirata (Tempo Stability Score)
+        # 4. Pillar 1: Laya Sthirata (Tempo Stability Score)
         # -------------------------------------------------------------
-        # Measure variance in inter-beat intervals (IBI)
         if len(beat_times) >= 3:
             ibis = np.diff(beat_times)
             mean_ibi = np.mean(ibis)
             ibi_std = np.std(ibis)
-            # Coefficient of Variation (CV = std / mean)
             cv_pct = (ibi_std / mean_ibi) * 100.0 if mean_ibi > 0 else 50.0
             laya_stability_score = max(0.0, min(100.0, 100.0 - (cv_pct * 3.0)))
         else:
             laya_stability_score = 50.0
 
         # -------------------------------------------------------------
-        # 4. Pillar 2: Sam Precision (Beat 1 Mastery)
+        # 5. Pillar 2: Sam Precision (Beat 1 Mastery)
         # -------------------------------------------------------------
         sam_alignments = [
             a for a in alignment_data["alignments"]
@@ -153,28 +216,25 @@ class KathakEvaluator:
         ]
         if sam_alignments:
             mean_sam_error = float(np.mean([abs(s["offset_ms"]) for s in sam_alignments]))
-            # 0ms error = 100%, 70ms error = 0%
             sam_precision_score = max(0.0, min(100.0, 100.0 - (mean_sam_error * 1.4)))
         else:
-            sam_precision_score = 20.0  # Penalized for missing Sam entirely
+            sam_precision_score = 20.0
             mean_sam_error = None
 
         # -------------------------------------------------------------
-        # 5. Pillar 3: Matra Synchrony (Micro-timing Jitter)
+        # 6. Pillar 3: Matra Synchrony (Micro-timing Jitter)
         # -------------------------------------------------------------
         mean_abs_error = tala_metrics["mean_absolute_error_ms"]
-        # 0ms error = 100%, 80ms error = 0%
         rhythmic_synchrony_score = max(0.0, min(100.0, 100.0 - (mean_abs_error * 1.25)))
 
         # -------------------------------------------------------------
-        # 6. Pillar 4: Bol Shuddhata (Syllable Accuracy)
+        # 7. Pillar 4: Bol Shuddhata (Syllable Accuracy)
         # -------------------------------------------------------------
         bol_accuracy_score = float(bol_alignment["similarity_score"])
 
         # -------------------------------------------------------------
-        # 7. Composite Weighted Score
+        # 8. Composite Weighted Score
         # -------------------------------------------------------------
-        # Weights: Rhythmic Synchrony (35%), Laya Stability (25%), Sam Precision (20%), Bol Accuracy (20%)
         composite_score = round(
             (0.35 * rhythmic_synchrony_score) +
             (0.25 * laya_stability_score) +
@@ -185,7 +245,7 @@ class KathakEvaluator:
         letter_grade, title_award = determine_letter_grade(composite_score)
 
         # -------------------------------------------------------------
-        # 8. Pedagogical Diagnostic Critiques
+        # 9. Classical Shastra Pedagogical Critiques
         # -------------------------------------------------------------
         feedback: List[DiagnosticFeedback] = []
 
@@ -240,19 +300,137 @@ class KathakEvaluator:
                 message="High tempo drift detected. The internal clock is speeding up or dragging across Vibhags.",
             ))
 
-        # Khali (Beat 9) Check
-        khali_alignments = [
-            a for a in alignment_data["alignments"]
-            if a["action"] == "KHALI" and a["offset_ms"] is not None
-        ]
-        for k in khali_alignments:
-            if k["status"] == "EARLY_RUSHING":
+        # Tala-Specific Shastra Diagnostic Checks
+        if active_taal == "Jhaptaal":
+            b6_alignments = [a for a in alignment_data["alignments"] if a["matra"] == 6 and a["offset_ms"] is not None]
+            b3_alignments = [a for a in alignment_data["alignments"] if a["matra"] == 3 and a["offset_ms"] is not None]
+            b8_alignments = [a for a in alignment_data["alignments"] if a["matra"] == 8 and a["offset_ms"] is not None]
+
+            # Syllable clarity: Dhi vs Ti
+            has_ti = any(t in ["Ti", "Tin", "Te"] for t in detected_tokens)
+            has_dhi = any(t in ["Dhi", "Dhin", "Dha"] for t in detected_tokens)
+            if has_ti and has_dhi:
                 feedback.append(DiagnosticFeedback(
-                    category="RHYTHM",
-                    severity="WARNING",
-                    message=f"Rushed Khali (Beat 9) in Cycle {k['cycle']} by {abs(k['offset_ms']):.1f}ms. Maintain open pause.",
-                    timestamp=k["target_time"],
+                    category="JHAPTAAL_SHASTRA",
+                    severity="EXCELLENT",
+                    message="झपताल बोल शुद्धि: Resonant open 'Dhi' (beats 1,3,4,8,9) sharply contrasts with crisp, flat 'Ti' (beat 6 Khali).",
                 ))
+            else:
+                feedback.append(DiagnosticFeedback(
+                    category="JHAPTAAL_SHASTRA",
+                    severity="INFO",
+                    message="झपताल बोल स्पष्टता: Ensure acoustic contrast between resonant 'Dhi' and crisp closed 'Ti' on Beat 6.",
+                ))
+
+            # Khali drop on beat 6
+            if b6_alignments:
+                k_offset = b6_alignments[0]["offset_ms"]
+                if abs(k_offset) > 40:
+                    feedback.append(DiagnosticFeedback(
+                        category="JHAPTAAL_SHASTRA",
+                        severity="WARNING",
+                        message=f"झपताल खाली (Beat 6): Khali wave deviated by {k_offset:+.1f}ms. Allow a complete vocal drop on beat 6.",
+                        timestamp=b6_alignments[0]["target_time"],
+                    ))
+                else:
+                    feedback.append(DiagnosticFeedback(
+                        category="JHAPTAAL_SHASTRA",
+                        severity="EXCELLENT",
+                        message="झपताल खाली वज़न: Clean drop in vocal emphasis on Beat 6 Khali with 2+3+2+3 vibhag structure.",
+                        timestamp=b6_alignments[0]["target_time"],
+                    ))
+
+            if b3_alignments and b8_alignments:
+                feedback.append(DiagnosticFeedback(
+                    category="JHAPTAAL_SHASTRA",
+                    severity="EXCELLENT",
+                    message="झपताल ताली वज़न: Proper accentuation maintained on Beat 3 (ताली २) and Beat 8 (ताली ३).",
+                    timestamp=b3_alignments[0]["target_time"],
+                ))
+
+        elif active_taal == "Dadra":
+            b1_al = [a for a in alignment_data["alignments"] if a["matra"] == 1]
+            b4_al = [a for a in alignment_data["alignments"] if a["matra"] == 4]
+            symmetry_ok = True
+            if len(b1_al) > 0 and len(b4_al) > 0:
+                v1_dur = b4_al[0]["target_time"] - b1_al[0]["target_time"]
+                cycle_len = (60.0 / tempo_bpm) * 6
+                half_len = cycle_len / 2.0
+                diff_pct = abs(v1_dur - half_len) / half_len * 100.0
+                if diff_pct < 10.0:
+                    feedback.append(DiagnosticFeedback(
+                        category="DADRA_SHASTRA",
+                        severity="EXCELLENT",
+                        message=f"दादरा सममिति (Symmetry): Both 3-beat Vibhags (3+3) are balanced within {diff_pct:.1f}% duration tolerance.",
+                    ))
+                else:
+                    symmetry_ok = False
+                    feedback.append(DiagnosticFeedback(
+                        category="DADRA_SHASTRA",
+                        severity="WARNING",
+                        message=f"दादरा सममिति असंतुलन: Vibhag 1 and Vibhag 2 differ by {diff_pct:.1f}%. Keep both 3-beat halves equal.",
+                    ))
+            feedback.append(DiagnosticFeedback(
+                category="DADRA_SHASTRA",
+                severity="INFO" if symmetry_ok else "WARNING",
+                message="दादरा वज़न (Lilt): Maintain swinging syncopated waltz lilt ('Dha Dhi Na | Dha Tu Na'). Avoid rigid marching tempo.",
+            ))
+
+        elif active_taal == "Kehrava":
+            b5_al = [a for a in alignment_data["alignments"] if a["matra"] == 5 and a["offset_ms"] is not None]
+            if b5_al:
+                k_err = b5_al[0]["offset_ms"]
+                if abs(k_err) <= 35:
+                    feedback.append(DiagnosticFeedback(
+                        category="KEHRAVA_SHASTRA",
+                        severity="EXCELLENT",
+                        message=f"कहरवा धुरी (Pivot Beat 5): Khali wave executed accurately ({k_err:+.1f}ms). Transition from heavy first half to lighter second half is clean.",
+                        timestamp=b5_al[0]["target_time"],
+                    ))
+                else:
+                    feedback.append(DiagnosticFeedback(
+                        category="KEHRAVA_SHASTRA",
+                        severity="WARNING",
+                        message=f"कहरवा धुरी (Pivot Beat 5): Beat 5 wave timing was offset by {k_err:+.1f}ms. Mark the shift to 'Na Ka Dhi Na' clearly.",
+                        timestamp=b5_al[0]["target_time"],
+                    ))
+
+            if len(beat_times) >= 8:
+                first_half_ibi = np.mean(np.diff(beat_times[:4])) if len(beat_times) >= 5 else 0
+                second_half_ibi = np.mean(np.diff(beat_times[4:8])) if len(beat_times) >= 8 else 0
+                if first_half_ibi > 0 and second_half_ibi > 0:
+                    drift_pct = ((first_half_ibi - second_half_ibi) / first_half_ibi) * 100.0
+                    if drift_pct > 8.0:
+                        feedback.append(DiagnosticFeedback(
+                            category="KEHRAVA_SHASTRA",
+                            severity="WARNING",
+                            message=f"कहरवा गति वृद्धि (Acceleration): Second half accelerated by {drift_pct:.1f}%. Keep driving pulse steady without rushing.",
+                        ))
+                    elif drift_pct < -8.0:
+                        feedback.append(DiagnosticFeedback(
+                            category="KEHRAVA_SHASTRA",
+                            severity="WARNING",
+                            message=f"कहरवा गति मंदी (Dragging): Second half dragged by {abs(drift_pct):.1f}%. Maintain forward energy.",
+                        ))
+                    else:
+                        feedback.append(DiagnosticFeedback(
+                            category="KEHRAVA_SHASTRA",
+                            severity="EXCELLENT",
+                            message=f"कहरवा लय स्थिरता: Excellent tempo consistency across both halves (acceleration drift only {abs(drift_pct):.1f}%).",
+                        ))
+        else:  # Teental
+            khali_alignments = [
+                a for a in alignment_data["alignments"]
+                if a["action"] == "KHALI" and a["offset_ms"] is not None
+            ]
+            for k in khali_alignments:
+                if k["status"] == "EARLY_RUSHING":
+                    feedback.append(DiagnosticFeedback(
+                        category="RHYTHM",
+                        severity="WARNING",
+                        message=f"तीनताल खाली (Beat 9) rushed in Cycle {k['cycle']} by {abs(k['offset_ms']):.1f}ms. Maintain open pause.",
+                        timestamp=k["target_time"],
+                    ))
 
         # Bol Feedback
         if bol_accuracy_score >= 70.0:
@@ -274,6 +452,10 @@ class KathakEvaluator:
             tempo_bpm=tempo_bpm,
             laya_category=tala_metrics["laya_category"],
             matched_repertoire=best_repertoire,
+            taal_name=active_taal,
+            taal_display=taal_spec["display_name"],
+            taal_structure=taal_spec["structure"],
+            taal_confidence=round(taal_confidence, 1),
             laya_stability_score=round(laya_stability_score, 1),
             sam_precision_score=round(sam_precision_score, 1),
             rhythmic_synchrony_score=round(rhythmic_synchrony_score, 1),
@@ -286,7 +468,12 @@ class KathakEvaluator:
 
         raw_data = {
             "tala_metrics": tala_metrics,
+            "taal_spec": taal_spec,
+            "taal_name": active_taal,
+            "anchor_t0": t0,
             "bol_alignment": bol_alignment,
+            "bol_events": bol_events,
+            "alignment_data": alignment_data,
             "raw_transcript": raw_transcript,
             "grid": grid,
             "onset_times": onset_times,

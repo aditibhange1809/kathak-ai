@@ -31,26 +31,161 @@ TEENTAL_THEKA = [
     "Ta",  "Dhin", "Dhin", "Dha",  # Vibhag 4 (Taali - Beat 13)
 ]
 
+# ---------------------------------------------------------------------------
+# Comprehensive Indian Classical Dance Tala Specifications
+# ---------------------------------------------------------------------------
+TAAL_DEFINITIONS = {
+    "Teental": {
+        "name": "Teental",
+        "display_name": "तीनताल (Teental)",
+        "matras": 16,
+        "vibhags": [4, 4, 4, 4],
+        "vibhag_names": ["विभाग १ (Sam)", "विभाग २ (Taali 2)", "विभाग ३ (Khali)", "विभाग ४ (Taali 3)"],
+        "structure": "4 + 4 + 4 + 4",
+        "theka": [
+            "Dha", "Dhin", "Dhin", "Dha",
+            "Dha", "Dhin", "Dhin", "Dha",
+            "Dha", "Tin",  "Tin",  "Ta",
+            "Ta",  "Dhin", "Dhin", "Dha",
+        ],
+        "theka_devanagari": [
+            "धा", "धिं", "धिं", "धा",
+            "धा", "धिं", "धिं", "धा",
+            "धा", "तिं", "तिं", "ता",
+            "ता", "धिं", "धिं", "धा",
+        ],
+        "actions": [
+            "SAM", "MATRA", "MATRA", "MATRA",
+            "TAALI_2", "MATRA", "MATRA", "MATRA",
+            "KHALI", "MATRA", "MATRA", "MATRA",
+            "TAALI_3", "MATRA", "MATRA", "MATRA",
+        ],
+        "signs": ["X", "२", "३", "४", "२", "६", "७", "८", "०", "१०", "११", "१२", "३", "१४", "१५", "१६"],
+        "vibhag_signs": ["X", "२", "०", "३"],
+        "vibhag_cls": ["sam", "taali", "khali", "taali"],
+        "vibhag_kriyas": ["भरी — ताली १", "भरी — ताली २", "खाली — निश्शब्द", "भरी — ताली ३"],
+        "gestures": [
+            "ताली १ 👏", "अंगुली २", "अंगुली ३", "अंगुली ४",
+            "ताली २ 👏", "अंगुली ६", "अंगुली ७", "अंगुली ८",
+            "खाली ✋ (Wave)", "अंगुली १०", "अंगुली ११", "अंगुली १२",
+            "ताली ३ 👏", "अंगुली १४", "अंगुली १५", "अंगुली १६",
+        ],
+        "sam_matras": [1],
+        "taali_matras": [1, 5, 13],
+        "khali_matras": [9],
+        "description": "16-Matra symmetrical rhythm (4+4+4+4), foundational meter of Kathak dance.",
+    },
+    "Jhaptaal": {
+        "name": "Jhaptaal",
+        "display_name": "झपताल (Jhaptaal)",
+        "matras": 10,
+        "vibhags": [2, 3, 2, 3],
+        "vibhag_names": ["विभाग १ (Sam)", "विभाग २ (Taali 2)", "विभाग ३ (Khali)", "विभाग ४ (Taali 3)"],
+        "structure": "2 + 3 + 2 + 3",
+        "theka": [
+            "Dhi", "Na",
+            "Dhi", "Dhi", "Na",
+            "Ti",  "Na",
+            "Dhi", "Dhi", "Na",
+        ],
+        "theka_devanagari": [
+            "धि", "ना",
+            "धि", "धि", "ना",
+            "ती", "ना",
+            "धि", "धि", "ना",
+        ],
+        "actions": ["SAM", "MATRA", "TAALI_2", "MATRA", "MATRA", "KHALI", "MATRA", "TAALI_3", "MATRA", "MATRA"],
+        "signs": ["X", "२", "२", "४", "५", "०", "७", "३", "९", "१०"],
+        "vibhag_signs": ["X", "२", "०", "३"],
+        "vibhag_cls": ["sam", "taali", "khali", "taali"],
+        "vibhag_kriyas": ["भरी — ताली १", "भरी — ताली २", "खाली — निश्शब्द", "भरी — ताली ३"],
+        "gestures": [
+            "ताली १ 👏", "अंगुली २",
+            "ताली २ 👏", "अंगुली ४", "अंगुली ५",
+            "खाली ✋ (Wave)", "अंगुली ७",
+            "ताली ३ 👏", "अंगुली ९", "अंगुली १०",
+        ],
+        "sam_matras": [1],
+        "taali_matras": [1, 3, 8],
+        "khali_matras": [6],
+        "description": "10-Matra asymmetrical rhythm (2+3+2+3) demanding precise pacing and accent on beats 3 & 8.",
+    },
+    "Dadra": {
+        "name": "Dadra",
+        "display_name": "दादरा (Dadra)",
+        "matras": 6,
+        "vibhags": [3, 3],
+        "vibhag_names": ["विभाग १ (Sam)", "विभाग २ (Khali)"],
+        "structure": "3 + 3",
+        "theka": [
+            "Dha", "Dhi", "Na",
+            "Dha", "Tu",  "Na",
+        ],
+        "theka_devanagari": [
+            "धा", "धि", "ना",
+            "धा", "तू", "ना",
+        ],
+        "actions": ["SAM", "MATRA", "MATRA", "KHALI", "MATRA", "MATRA"],
+        "signs": ["X", "२", "३", "०", "५", "६"],
+        "vibhag_signs": ["X", "०"],
+        "vibhag_cls": ["sam", "khali"],
+        "vibhag_kriyas": ["भरी — ताली १", "खाली — निश्शब्द"],
+        "gestures": [
+            "ताली १ 👏", "अंगुली २", "अंगुली ३",
+            "खाली ✋ (Wave)", "अंगुली ५", "अंगुली ६",
+        ],
+        "sam_matras": [1],
+        "taali_matras": [1],
+        "khali_matras": [4],
+        "description": "6-Matra swinging rhythm (3+3) prominent in thumris, light-classical, and bhaav pieces.",
+    },
+    "Kehrava": {
+        "name": "Kehrava",
+        "display_name": "कहरवा (Kehrava)",
+        "matras": 8,
+        "vibhags": [4, 4],
+        "vibhag_names": ["विभाग १ (Sam)", "विभाग २ (Khali)"],
+        "structure": "4 + 4",
+        "theka": [
+            "Dha", "Ge", "Na", "Ti",
+            "Na",  "Ka", "Dhi", "Na",
+        ],
+        "theka_devanagari": [
+            "धा", "गे", "ना", "ती",
+            "ना", "क", "धि", "ना",
+        ],
+        "actions": ["SAM", "MATRA", "MATRA", "MATRA", "KHALI", "MATRA", "MATRA", "MATRA"],
+        "signs": ["X", "२", "३", "४", "०", "६", "७", "८"],
+        "vibhag_signs": ["X", "०"],
+        "vibhag_cls": ["sam", "khali"],
+        "vibhag_kriyas": ["भरी — ताली १", "खाली — निश्शब्द"],
+        "gestures": [
+            "ताली १ 👏", "अंगुली २", "अंगुली ३", "अंगुली ४",
+            "खाली ✋ (Wave)", "अंगुली ६", "अंगुली ७", "अंगुली ८",
+        ],
+        "sam_matras": [1],
+        "taali_matras": [1],
+        "khali_matras": [5],
+        "description": "8-Matra driving rhythm (4+4) with pivot on beat 5, prominent in fast Kathak choreography.",
+    },
+}
+
 
 @dataclass
 class MatraInfo:
     cycle: int
-    matra: int  # 1 to 16
+    matra: int  # 1 to N
     timestamp: float
     action: str  # 'SAM', 'TAALI_2', 'KHALI', 'TAALI_3', 'MATRA'
     canonical_bol: str
 
 
-def get_matra_action(matra: int) -> str:
-    """Returns the structural classical action for a given Teental matra."""
-    if matra == 1:
-        return "SAM"
-    elif matra == 5:
-        return "TAALI_2"
-    elif matra == 9:
-        return "KHALI"
-    elif matra == 13:
-        return "TAALI_3"
+def get_matra_action(matra: int, taal_name: str = "Teental") -> str:
+    """Returns the structural classical action for a given matra in specified Tala."""
+    taal = TAAL_DEFINITIONS.get(taal_name, TAAL_DEFINITIONS["Teental"])
+    actions = taal["actions"]
+    if 1 <= matra <= len(actions):
+        return actions[matra - 1]
     return "MATRA"
 
 
@@ -95,14 +230,20 @@ def estimate_tempo_and_beats(
     return tempo_bpm, beat_times, onset_times
 
 
-def generate_teental_grid(
+def generate_tala_grid(
     t0: float,
     tempo_bpm: float,
     total_duration: float,
+    taal_name: str = "Teental",
 ) -> List[MatraInfo]:
     """
-    Generates an idealized 16-Matra Teental theoretical grid from anchor time t0.
+    Generates an idealized theoretical Matra grid for any Indian Classical Tala
+    (Teental, Jhaptaal, Dadra, Kehrava) from anchor time t0.
     """
+    taal = TAAL_DEFINITIONS.get(taal_name, TAAL_DEFINITIONS["Teental"])
+    cycle_matras = taal["matras"]
+    theka = taal["theka"]
+    actions = taal["actions"]
     matra_duration = 60.0 / tempo_bpm
     grid: List[MatraInfo] = []
 
@@ -110,10 +251,10 @@ def generate_teental_grid(
     global_beat_index = 0
 
     while current_time <= total_duration:
-        cycle_num = (global_beat_index // 16) + 1
-        matra_num = (global_beat_index % 16) + 1
-        action = get_matra_action(matra_num)
-        bol = TEENTAL_THEKA[matra_num - 1]
+        cycle_num = (global_beat_index // cycle_matras) + 1
+        matra_num = (global_beat_index % cycle_matras) + 1
+        action = actions[matra_num - 1]
+        bol = theka[matra_num - 1]
 
         grid.append(
             MatraInfo(
@@ -128,6 +269,18 @@ def generate_teental_grid(
         global_beat_index += 1
 
     return grid
+
+
+def generate_teental_grid(
+    t0: float,
+    tempo_bpm: float,
+    total_duration: float,
+) -> List[MatraInfo]:
+    """
+    Generates an idealized 16-Matra Teental theoretical grid from anchor time t0.
+    Maintained for backward compatibility.
+    """
+    return generate_tala_grid(t0, tempo_bpm, total_duration, taal_name="Teental")
 
 
 def quantize_onsets_to_grid(
@@ -260,7 +413,8 @@ def visualize_tala_grid(
     onsets: np.ndarray,
     grid: List[MatraInfo],
     alignment_data: Dict,
-    title: str = "Kathak Teental Alignment Analysis",
+    title: str = "Kathak Tala Alignment Analysis",
+    taal_name: str = "Teental",
     save_path: Optional[Path] = None,
 ) -> Path:
     """
@@ -299,11 +453,11 @@ def visualize_tala_grid(
             ax1.text(m.timestamp, 0.75, f"M{m.matra}", color="#e76f51", rotation=90, fontsize=8)
         elif m.action == "KHALI":
             ax1.axvline(m.timestamp, color="#457b9d", linewidth=1.8, linestyle="-.")
-            ax1.text(m.timestamp, 0.75, f"KHALI (M9)", color="#457b9d", rotation=90, fontsize=8, fontweight="bold")
+            ax1.text(m.timestamp, 0.75, f"KHALI (M{m.matra})", color="#457b9d", rotation=90, fontsize=8, fontweight="bold")
         else:
             ax1.axvline(m.timestamp, color="#adb5bd", linewidth=0.8, linestyle=":")
 
-    ax1.set_title(f"{title} - 16-Matra Teental Grid Overlay")
+    ax1.set_title(f"{title} — {taal_name} Grid Overlay")
     ax1.set_ylabel("Amplitude")
     ax1.set_xlabel("Time (seconds)")
     ax1.legend(loc="upper right")
