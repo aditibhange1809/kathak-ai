@@ -1,1922 +1,898 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kathak AI — Dance Intelligence Platform</title>
-  <meta name="description"
-    content="AI-powered Tala rhythm tracking, bol recognition, and performance evaluation for Indian Classical Kathak Dance." />
+  <title>Kathak AI — The Art of Practice</title>
+  <meta name="description" content="AI-powered Tala rhythm tracking, bol recognition, and performance evaluation for Indian Classical Kathak Dance." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
-    rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap" rel="stylesheet" />
+
   <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    /* ── Design Tokens ─────────────────────────────────────────────────────── */
     :root {
-      --bg: #fdfbf7;
-      --surface: #ffffff;
-      --card: #fffdf9;
-      --border: #e6dfd5;
-      --accent: #b45309;
-      --accent-dark: #78350f;
-      --terracotta: #9a3412;
-      --green: #166534;
-      --red: #991b1b;
-      --blue: #1e40af;
-      --text: #292524;
-      --muted: #78716c;
-      --radius: 14px;
-      --shadow: 0 4px 12px -2px rgba(120, 53, 15, 0.06), 0 2px 6px -1px rgba(120, 53, 15, 0.04);
+      --ivory: #fcf8ee;      /* container surface */
+      --sand: #f4eedd;       /* page background */
+      --sand-2: #eee7d5;     /* hover well */
+      --line-soft: #eae3cf;  /* light border */
+      --line: #d9cdb6;       /* border */
+      --brown: #857361;      /* secondary text */
+      --espresso: #422c21;   /* primary text */
+      --vermillion: #963e31; /* accent */
+      --vermillion-dk: #823429;
+      --olive: #535b35;      /* hero banner */
+      --arch: #ada887;
+      --gold: #d8ceac;
+
+      /* Tala semantics (re-toned for the new palette) */
+      --sam: #535b35;
+      --taali: #963e31;
+      --khali: #3f5f7f;
+
+      /* Timing status */
+      --ok: #4f6b2c;
+      --early: #b07a1a;
+      --late: #963e31;
+      --missed: #9a8f80;
+
+      --font-serif: "Tiro Devanagari Hindi", Georgia, serif;
+      --font-sans: "Inter", "Noto Sans Devanagari", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-deva: "Noto Sans Devanagari", "Inter", sans-serif;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+    html { scroll-behavior: smooth; }
+
+    html, body {
+      background-color: var(--sand);
+      color: var(--espresso);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      width: 100%;
     }
 
-    /* ── Screen Controller ── */
-    .screen {
-      display: none;
-    }
+    button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; }
 
-    .screen.active {
-      display: block;
-    }
+    /* ── Screen Controller ─────────────────────────────────────────────────── */
+    .screen { display: none; flex-direction: column; gap: 36px; width: 100%; }
+    .screen.active { display: flex; }
 
-    /* ── Compact Warm Hero ── */
-    .hero {
-      background: linear-gradient(135deg, #fef3c7 0%, #fae8ff 40%, #fdfbf7 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 32px 24px 24px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .hero-logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--accent);
-      box-shadow: 0 2px 8px rgba(180, 83, 9, 0.2);
-    }
-
-    .hero h1 {
-      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: var(--accent-dark);
-      margin-bottom: 4px;
-    }
-
-    .hero .subtitle {
-      color: var(--muted);
-      font-size: 0.95rem;
-      font-weight: 400;
-      max-width: 540px;
+    .studio-wrapper {
+      width: 100%;
+      max-width: 1120px;
       margin: 0 auto;
+      padding: 40px 24px 80px;
     }
 
-    .pillars-badge {
-      display: inline-flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 14px;
+    @media (max-width: 768px) {
+      .studio-wrapper { padding: 24px 16px 60px; }
+      .screen { gap: 28px; }
     }
 
-    .badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.3px;
+    /* ── Brand Bar ─────────────────────────────────────────────────────────── */
+    .studio-identity { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .brand-left { display: flex; align-items: center; gap: 16px; }
+    .brand-rosette { width: 44px; height: 44px; flex-shrink: 0; }
+    .brand-copy { display: flex; flex-direction: column; gap: 2px; }
+    .brand-name { font-family: var(--font-serif); font-size: 26px; line-height: 1.1; font-weight: 400; letter-spacing: -0.02em; }
+    .brand-caption, .eyebrow {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown);
+    }
+    .pill {
+      border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--brown); background-color: var(--ivory); white-space: nowrap;
+    }
+    @media (max-width: 768px) {
+      .studio-identity { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .studio-identity .pill { display: none; }
     }
 
-    .badge-brown {
-      background: rgba(120, 53, 15, .1);
-      color: #78350f;
-      border: 1px solid rgba(120, 53, 15, .2);
-    }
+    /* ── Textile Border ────────────────────────────────────────────────────── */
+    .textile-border-container { width: 100%; overflow: hidden; height: 20px; opacity: 0.85; user-select: none; }
+    .textile-border-container svg { width: 100%; min-width: 800px; height: 20px; }
 
-    .badge-amber {
-      background: rgba(180, 83, 9, .1);
-      color: #b45309;
-      border: 1px solid rgba(180, 83, 9, .2);
+    /* ── Hero ──────────────────────────────────────────────────────────────── */
+    .welcome-panel {
+      background-color: var(--olive); border-radius: 8px; padding: 38px 42px;
+      display: flex; justify-content: space-between; align-items: center; gap: 36px;
     }
+    .welcome-copy { display: flex; flex-direction: column; gap: 16px; max-width: 580px; }
+    .welcome-panel .eyebrow { color: var(--line-soft); }
+    .welcome-title { font-family: var(--font-serif); font-size: 46px; line-height: 1.15; font-weight: 400; letter-spacing: -0.02em; color: var(--ivory); }
+    .welcome-description { font-size: 14px; line-height: 1.65; color: var(--line-soft); max-width: 500px; }
+    .welcome-notation { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--line); }
 
-    .badge-green {
-      background: rgba(22, 101, 52, .1);
-      color: #166534;
-      border: 1px solid rgba(22, 101, 52, .2);
+    .classical-arch {
+      border: 1px solid var(--arch); border-radius: 110px 110px 4px 4px;
+      width: 200px; height: 220px; padding: 24px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+      background: rgba(0, 0, 0, 0.12); flex-shrink: 0; text-align: center;
     }
-
-    .badge-terra {
-      background: rgba(154, 52, 18, .1);
-      color: #9a3412;
-      border: 1px solid rgba(154, 52, 18, .2);
-    }
-
-    /* ── Main Layout ── */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 28px 24px 64px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-    }
+    .arch-rosette { width: 44px; height: 44px; }
+    .arch-hindi { font-family: var(--font-serif); font-size: 26px; line-height: 1.2; color: var(--ivory); font-weight: 400; }
+    .arch-caption { font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--line); }
 
     @media (max-width: 860px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
-
-      .grid-3 {
-        grid-template-columns: 1fr;
-      }
-
-      .grid-4 {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .welcome-panel { flex-direction: column; align-items: flex-start; padding: 30px 24px; }
+      .welcome-title { font-size: 34px; }
+      .classical-arch { align-self: center; }
     }
 
-    @media (max-width: 480px) {
-      .grid-4 {
-        grid-template-columns: 1fr;
-      }
+    /* ── Section headings ──────────────────────────────────────────────────── */
+    .section-header { display: flex; flex-direction: column; gap: 6px; }
+    .section-title { font-family: var(--font-serif); font-size: 28px; line-height: 1.2; font-weight: 400; letter-spacing: -0.02em; }
+
+    /* ── Practice Cards ────────────────────────────────────────────────────── */
+    .practice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
+    @media (max-width: 900px) { .practice-grid { grid-template-columns: 1fr; } }
+
+    .practice-card, .card {
+      background-color: var(--ivory); border: 1px solid var(--line); border-radius: 6px;
+      padding: 24px; display: flex; flex-direction: column; gap: 16px;
     }
+    .card-icon-row svg { width: 18px; height: 18px; stroke: var(--vermillion); }
+    .card-heading { font-family: var(--font-serif); font-size: 20px; font-weight: 400; letter-spacing: -0.02em; }
+    .card-desc { font-size: 12px; line-height: 1.55; color: var(--brown); }
 
-    /* ── Card ── */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px;
-      box-shadow: var(--shadow);
+    /* Upload */
+    .audio-drop-area {
+      background-color: var(--sand); border: 1px dashed var(--line); border-radius: 4px;
+      padding: 22px 16px; min-height: 130px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; transition: all 0.2s ease; text-align: center;
     }
+    .audio-drop-area:hover, .audio-drop-area.drag-over { border-color: var(--vermillion); background-color: var(--sand-2); }
+    .audio-drop-area svg { width: 22px; height: 22px; stroke: var(--brown); }
+    .drop-caption { font-size: 12px; font-weight: 500; }
+    .drop-formats { font-size: 10px; color: var(--brown); text-transform: uppercase; letter-spacing: 0.08em; }
+    .selected-file-badge { font-size: 11px; font-weight: 600; color: var(--vermillion); word-break: break-all; min-height: 16px; }
 
-    .card-title {
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--muted);
-      margin-bottom: 12px;
+    .tala-select-group { display: flex; flex-direction: column; gap: 6px; }
+    .tala-label { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown); }
+    .tala-select {
+      width: 100%; background-color: var(--ivory); border: 1px solid var(--line); border-radius: 4px;
+      padding: 10px 32px 10px 12px; font-size: 12px; font-family: var(--font-sans); color: var(--espresso);
+      outline: none; cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23857361' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
     }
+    .tala-select:focus { border-color: var(--espresso); }
+    .tala-hint { font-size: 10px; color: var(--brown); font-family: var(--font-deva); }
 
-    /* ── Upload Zone ── */
-    .upload-zone {
-      border: 2px dashed #d6c9b8;
-      border-radius: var(--radius);
-      padding: 40px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .25s, background .25s;
-      background: #faf6f0;
-      position: relative;
+    .cta-btn-primary {
+      background-color: var(--vermillion); color: var(--ivory); border-radius: 4px;
+      padding: 12px 18px; font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      transition: background-color 0.15s ease, opacity 0.15s ease;
     }
+    .cta-btn-primary:hover { background-color: var(--vermillion-dk); }
+    .cta-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; background-color: var(--vermillion); }
+    .cta-btn-primary svg { width: 14px; height: 14px; stroke: var(--ivory); fill: none; }
 
-    .upload-zone:hover,
-    .upload-zone.drag-over {
-      border-color: var(--accent);
-      background: rgba(180, 83, 9, .04);
+    /* Record */
+    .recording-well {
+      background-color: var(--sand); border: 1px solid var(--line); border-radius: 100px 100px 4px 4px;
+      min-height: 210px; padding: 28px 20px 20px; margin-top: auto;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center;
     }
-
-    .upload-zone input[type=file] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
+    .mic-circle {
+      background-color: var(--vermillion); width: 66px; height: 66px; border-radius: 100%;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s ease; box-shadow: 0 4px 14px rgba(150, 62, 49, 0.25);
     }
-
-    .upload-icon {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      display: block;
+    .mic-circle:hover { transform: scale(1.05); }
+    .mic-circle.recording { animation: pulse-red 1.4s infinite; background-color: #7a2a20; }
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(150, 62, 49, 0.6); }
+      70% { box-shadow: 0 0 0 16px rgba(150, 62, 49, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(150, 62, 49, 0); }
     }
-
-    .upload-zone h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    .upload-zone p {
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    /* ── Recording Zone ── */
-    .record-zone {
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 24px;
-      text-align: center;
-      background: #faf6f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .record-btn {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 4px solid var(--border);
-      background: linear-gradient(135deg, #fef3c7, #fffdf9);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .3s ease;
-      position: relative;
-      box-shadow: 0 4px 20px rgba(180, 83, 9, 0.12);
-    }
-
-    .record-btn:hover {
-      border-color: var(--red);
-      transform: scale(1.05);
-    }
-
-    .record-btn.recording {
-      border-color: var(--red);
-      background: linear-gradient(135deg, #fecaca, #fee2e2);
-      animation: pulse-record 1.5s ease-in-out infinite;
-    }
-
-    .record-btn-inner {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--red);
-      transition: all .3s ease;
-    }
-
-    .record-btn.recording .record-btn-inner {
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
-    }
-
-    @keyframes pulse-record {
-
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(153, 27, 27, 0.3);
-      }
-
-      50% {
-        box-shadow: 0 0 0 16px rgba(153, 27, 27, 0);
-      }
-    }
-
+    .mic-circle svg { width: 26px; height: 26px; stroke: var(--ivory); fill: none; }
+    .record-status { font-size: 12px; font-weight: 500; }
+    .record-note { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown); }
     .record-timer {
-      font-size: 1.6rem;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      color: var(--red);
-      display: none;
+      display: none; font-family: var(--font-serif); font-size: 26px; line-height: 1;
+      font-variant-numeric: tabular-nums; color: var(--vermillion);
     }
-
-    .record-timer.visible {
-      display: block;
-    }
-
-    .record-label {
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--muted);
-    }
-
-    .record-waveform {
-      width: 100%;
-      height: 48px;
-      display: none;
-    }
-
-    .record-waveform.visible {
-      display: block;
-    }
-
-    .record-preview {
-      display: none;
-      width: 100%;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .record-preview.visible {
-      display: flex;
-    }
-
-    .record-preview audio {
-      width: 100%;
-      height: 36px;
-      border-radius: 8px;
-    }
-
-    .record-actions {
-      display: flex;
-      gap: 8px;
-    }
-
+    .record-timer.visible { display: block; }
+    .record-waveform { display: none; width: 100%; height: 40px; }
+    .record-waveform.visible { display: block; }
+    .record-preview { display: none; width: 100%; flex-direction: column; gap: 10px; align-items: center; }
+    .record-preview.visible { display: flex; }
+    .record-preview audio { width: 100%; height: 34px; }
+    .record-actions { display: flex; gap: 8px; }
     .btn-sm {
-      padding: 6px 16px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      transition: all .2s;
+      padding: 7px 14px; border-radius: 4px; font-size: 11px; font-weight: 500;
+      border: 1px solid var(--line); background: var(--ivory); color: var(--espresso); transition: all .15s;
     }
+    .btn-sm:hover { border-color: var(--espresso); background: var(--sand-2); }
+    .btn-sm.primary { background: var(--vermillion); color: var(--ivory); border-color: var(--vermillion); }
+    .btn-sm.primary:hover { background: var(--vermillion-dk); }
 
-    .btn-sm:hover {
-      border-color: var(--accent);
-      background: #fef3c7;
-    }
-
-    .btn-sm.primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      color: #fff;
-      border-color: transparent;
-    }
-
-    .btn-sm.primary:hover {
-      opacity: .9;
-    }
-
-    /* ── Library ── */
-    .library-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 240px;
-      overflow-y: auto;
-    }
-
-    .library-list::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .library-list::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 4px;
-    }
-
+    /* Library */
+    .library-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-top: auto; }
+    .library-list::-webkit-scrollbar { width: 4px; }
+    .library-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+    .library-empty { color: var(--brown); font-size: 12px; font-style: italic; }
     .library-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: #faf6f0;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
+      background-color: var(--sand); border: 1px solid var(--line); border-radius: 4px;
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; transition: all 0.18s ease;
+    }
+    .library-item:hover { border-color: var(--vermillion); background-color: var(--sand-2); }
+    .library-item-top { display: flex; align-items: center; gap: 12px; }
+    .library-item-top svg { width: 18px; height: 18px; stroke: var(--vermillion); flex-shrink: 0; }
+    .library-item .name { font-size: 13px; font-weight: 600; cursor: pointer; word-break: break-all; }
+    .library-item .name:hover { color: var(--vermillion); }
+    .library-item .size { font-size: 10px; color: var(--brown); }
+    .library-item audio { width: 100%; height: 30px; }
+    .library-note { font-size: 11px; font-style: italic; color: var(--brown); text-align: center; }
+
+    /* Journey */
+    .analysis-journey { display: flex; flex-direction: column; gap: 24px; padding-top: 12px; }
+    .journey-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    @media (max-width: 768px) { .journey-steps { grid-template-columns: repeat(2, 1fr); } }
+    .journey-step-item { display: flex; flex-direction: column; gap: 8px; }
+    .step-number { font-size: 11px; font-weight: 700; color: var(--vermillion); letter-spacing: 0.08em; }
+    .step-title { font-family: var(--font-serif); font-size: 18px; font-weight: 400; letter-spacing: -0.02em; }
+    .step-desc { font-size: 12px; line-height: 1.5; color: var(--brown); }
+
+    .studio-footer {
+      border-top: 1px solid var(--line); padding-top: 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .footer-tradition { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--brown); }
+
+    /* ── Loading Modal (with 4-stage pipeline) ─────────────────────────────── */
+    .loading-modal-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(66, 44, 33, 0.45);
+      backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 16px;
+    }
+    .loading-modal-backdrop.visible { display: flex; }
+    .loading-modal {
+      background-color: var(--ivory); border: 1px solid var(--line); border-radius: 8px;
+      padding: 36px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.18); text-align: center; max-width: 420px; width: 100%;
+    }
+    .spinner-rosette { width: 52px; height: 52px; animation: spin-slow 8s linear infinite; }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+    .loading-title { font-family: var(--font-serif); font-size: 22px; }
+    .loader-stages { display: flex; flex-direction: column; gap: 10px; text-align: left; width: 100%; }
+    .loader-stage { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--brown); transition: color .3s; }
+    .loader-stage.active { color: var(--vermillion); font-weight: 600; }
+    .loader-stage.done { color: var(--ok); font-weight: 500; }
+    .stage-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       EVALUATION VIEW
+       ══════════════════════════════════════════════════════════════════════ */
+    .evaluation-context { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .back-btn {
+      border: 1px solid var(--line); background-color: var(--ivory); border-radius: 4px;
+      padding: 9px 15px; display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500; transition: all 0.15s ease;
+    }
+    .back-btn:hover { background-color: var(--sand-2); border-color: var(--espresso); }
+    .back-btn svg { width: 14px; height: 14px; stroke: var(--espresso); fill: none; }
+
+    .eval-title-group { display: flex; flex-direction: column; gap: 8px; }
+    .eval-main-title { font-family: var(--font-serif); font-size: 42px; line-height: 1.15; font-weight: 400; letter-spacing: -0.02em; }
+    .eval-subtitle { font-size: 14px; color: var(--brown); max-width: 600px; line-height: 1.6; }
+
+    /* Grade banner */
+    .performance-summary-banner {
+      background-color: var(--olive); border-radius: 8px; padding: 34px 40px;
+      display: flex; justify-content: space-between; align-items: center; gap: 32px;
+    }
+    .assessment-copy { display: flex; flex-direction: column; gap: 12px; max-width: 640px; }
+    .performance-summary-banner .eyebrow { color: var(--line-soft); }
+    .assessment-title { font-family: var(--font-serif); font-size: 30px; line-height: 1.25; font-weight: 400; color: var(--ivory); }
+    .assessment-meta { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; color: var(--line); }
+    .overall-score-arch {
+      border: 1px solid var(--arch); border-radius: 80px 80px 4px 4px;
+      width: 150px; height: 170px; padding: 20px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      background: rgba(0, 0, 0, 0.15); flex-shrink: 0; text-align: center;
+    }
+    .overall-number { font-family: var(--font-serif); font-size: 52px; line-height: 1; color: var(--ivory); }
+    .overall-caption { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--line-soft); }
+    .overall-grade { font-size: 13px; font-weight: 600; color: var(--line-soft); }
+    @media (max-width: 800px) {
+      .performance-summary-banner { flex-direction: column; align-items: flex-start; padding: 24px; }
+      .overall-score-arch { align-self: center; }
     }
 
-    .library-item:hover {
-      border-color: var(--accent);
-      background: rgba(180, 83, 9, .04);
-    }
-
-    .library-item .name {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .library-item .size {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .library-item audio {
-      height: 28px;
-      border-radius: 6px;
-    }
-
-    /* ── Analyze Button ── */
-    .btn-analyze {
-      width: 100%;
-      margin-top: 16px;
-      padding: 13px;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-      color: #fff;
-      letter-spacing: 0.5px;
-      transition: opacity .2s, transform .15s;
-      box-shadow: 0 4px 14px rgba(180, 83, 9, 0.25);
-    }
-
-    .btn-analyze:hover {
-      opacity: .92;
-      transform: translateY(-1px);
-    }
-
-    .btn-analyze:disabled {
-      opacity: .4;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* ── Loader ── */
-    .loader {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 64px 24px;
-      text-align: center;
-    }
-
-    .loader.visible {
-      display: flex;
-    }
-
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .loader-stages {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .loader-stage {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.9rem;
-      color: var(--muted);
-      transition: color .3s;
-    }
-
-    .loader-stage.active {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .loader-stage.done {
-      color: var(--green);
-      font-weight: 500;
-    }
-
-    .stage-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    /* ── Navigation / Back Button ── */
-    .nav-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .btn-back {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--accent-dark);
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: var(--shadow);
-      transition: background .2s, border-color .2s;
-    }
-
-    .btn-back:hover {
-      background: #faf6f0;
-      border-color: var(--accent);
-    }
-
-    /* ── Grade Banner ── */
-    .grade-banner {
-      border-radius: var(--radius);
-      padding: 24px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-      background: linear-gradient(135deg, #fef3c7 0%, #fae8ff 100%);
-      border: 1px solid rgba(180, 83, 9, 0.2);
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-    }
-
-    .grade-left h2 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: var(--accent-dark);
-    }
-
-    .grade-left p {
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .grade-circle {
-      width: 84px;
-      height: 84px;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: conic-gradient(var(--accent) calc(var(--pct)*3.6deg), #e6dfd5 0);
-      padding: 3px;
-    }
-
-    .grade-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: var(--surface);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .grade-letter {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--accent);
-      line-height: 1;
-    }
-
-    .grade-score {
-      font-size: 0.68rem;
-      color: var(--muted);
-      margin-top: 2px;
-      font-weight: 600;
-    }
-
-    /* ── Pillar Cards ── */
+    /* Pillars */
+    .performance-pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    @media (max-width: 800px) { .performance-pillars { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .performance-pillars { grid-template-columns: 1fr; } }
     .pillar-card {
-      border-radius: var(--radius);
-      padding: 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: transform .2s;
+      background-color: var(--ivory); border: 1px solid var(--line); border-radius: 6px;
+      padding: 18px 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .pillar-label { font-size: 11px; font-weight: 600; color: var(--brown); }
+    .pillar-value { font-family: var(--font-serif); font-size: 26px; line-height: 1.1; }
+    .pillar-track { width: 100%; height: 3px; background-color: var(--line-soft); border-radius: 2px; overflow: hidden; }
+    .pillar-progress { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+    .pillar-detail { font-size: 11px; color: var(--brown); }
+
+    /* ── Tala & Rhythm Analysis ───────────────────────────────────────────── */
+    .tala-analysis-card {
+      background-color: var(--ivory); border: 1px solid var(--line); border-radius: 6px;
+      padding: 26px; display: flex; flex-direction: column; gap: 22px;
+    }
+    @media (max-width: 600px) { .tala-analysis-card { padding: 16px; } }
+    .card-header-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .card-title-serif { font-family: var(--font-serif); font-size: 22px; font-weight: 400; letter-spacing: -0.02em; }
+
+    /* Detected tala banner */
+    .detected-tala-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+      padding: 16px 20px; background: var(--sand); border: 1px solid var(--line);
+      border-left: 3px solid var(--vermillion); border-radius: 4px;
+    }
+    .detected-tala-left { display: flex; align-items: center; gap: 14px; }
+    .detected-tala-left svg { width: 36px; height: 36px; flex-shrink: 0; }
+    .detected-tala-title { font-family: var(--font-serif); font-size: 19px; line-height: 1.3; }
+    .detected-tala-sub { font-size: 11px; color: var(--brown); font-weight: 500; font-family: var(--font-deva); }
+    .detected-tala-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ivory); background: var(--vermillion); border-radius: 999px; padding: 7px 14px;
     }
 
-    .pillar-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .pillar-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .pillar-val {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
-    .pillar-bar {
-      height: 6px;
-      background: #faf6f0;
-      border-radius: 3px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-
-    .pillar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width .6s ease;
-    }
-
-    /* ── Tala Ring ── */
-    .tala-info {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
+    /* Chips */
+    .tala-info { display: flex; gap: 8px; flex-wrap: wrap; }
     .tala-chip {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      background: #faf6f0;
-      border: 1px solid var(--border);
-      color: var(--text);
+      padding: 6px 12px; border-radius: 999px; font-size: 12px;
+      background: var(--sand); border: 1px solid var(--line); font-family: var(--font-deva);
     }
+    .tala-chip .chip-lbl { color: var(--brown); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-right: 4px; font-family: var(--font-sans); }
+    .tala-chip strong { font-weight: 600; }
 
-    /* ── Tala Analysis & Integrated Playback ── */
-    .tala-header-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* ── Audio Playback + Interactive Bol Slider in Tala Section ── */
+    /* Player box */
     .tala-player-box {
-      background: linear-gradient(145deg, #fffcf7 0%, #faf5ea 100%);
-      border: 1.5px solid #ebd9c2;
-      border-radius: 12px;
-      padding: 18px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: inset 0 1px 3px rgba(120, 53, 15, 0.03);
+      background: var(--sand); border: 1px solid var(--line); border-radius: 4px;
+      padding: 18px 20px; display: flex; flex-direction: column; gap: 16px;
     }
-
-    .tala-player-controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .tala-player-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
+    @media (max-width: 600px) { .tala-player-box { padding: 14px 12px; } }
+    .tala-player-controls { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .tala-player-left { display: flex; align-items: center; gap: 14px; }
     .play-btn-tala {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 2px solid var(--accent);
-      background: linear-gradient(135deg, #fef3c7, #fffdf9);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      color: var(--accent-dark);
-      transition: all .25s ease;
-      box-shadow: 0 3px 10px rgba(180, 83, 9, 0.2);
-      flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 50%; background-color: var(--vermillion); color: var(--ivory);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background-color 0.15s ease, transform 0.1s ease;
     }
-
-    .play-btn-tala:hover {
-      transform: scale(1.08);
-      background: #fef3c7;
-      box-shadow: 0 4px 14px rgba(180, 83, 9, 0.3);
-    }
-
+    .play-btn-tala:hover { background-color: var(--vermillion-dk); transform: scale(1.05); }
+    .play-btn-tala svg { width: 18px; height: 18px; fill: currentColor; }
     .playback-time-badge {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--accent-dark);
-      background: #fff;
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      font-variant-numeric: tabular-nums;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+      background: var(--ivory); padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
     }
-
     .speed-btn-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: #faf6f0;
-      padding: 3px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 2px; background: var(--ivory);
+      padding: 3px; border-radius: 999px; border: 1px solid var(--line); flex-wrap: wrap;
     }
+    .speed-lbl { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brown); margin: 0 6px 0 8px; }
+    .speed-btn { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; color: var(--brown); transition: all .15s; }
+    .speed-btn:hover { color: var(--espresso); }
+    .speed-btn.active { background: var(--vermillion); color: var(--ivory); }
 
-    .speed-btn {
-      border: none;
-      background: transparent;
-      padding: 4px 10px;
-      border-radius: 14px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .2s;
-    }
-
-    .speed-btn.active,
-    .speed-btn:hover {
-      background: var(--surface);
-      color: var(--accent-dark);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    }
-
-    /* Live Inspector Callout Banner */
+    /* Live inspector */
     .matra-inspector-banner {
-      background: #ffffff;
-      border: 1px solid #ebd9c2;
-      border-left: 4px solid var(--accent);
-      border-radius: 8px;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 0.85rem;
-      color: var(--text);
-      min-height: 44px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-      flex-wrap: wrap;
+      background: var(--ivory); border: 1px solid var(--line); border-left: 3px solid var(--vermillion);
+      border-radius: 4px; padding: 10px 16px; min-height: 46px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
     }
-
-    .inspector-bol-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-      color: var(--accent-dark);
-      font-size: 0.92rem;
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-    }
-
+    .inspector-bol-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-family: var(--font-deva); color: var(--espresso); }
+    .inspector-bol-badge strong { font-weight: 700; color: var(--vermillion); }
     .inspector-status-badge {
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 0.74rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      padding: 4px 11px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-deva);
+      background: var(--sand); color: var(--brown); border: 1px solid var(--line);
     }
+    .inspector-status-badge.on-beat { background: rgba(79,107,44,.1); color: var(--ok); border-color: rgba(79,107,44,.3); }
+    .inspector-status-badge.early { background: rgba(176,122,26,.12); color: var(--early); border-color: rgba(176,122,26,.35); }
+    .inspector-status-badge.late { background: rgba(150,62,49,.08); color: var(--late); border-color: rgba(150,62,49,.3); }
+    .inspector-status-badge.missed { background: #efe9dc; color: var(--missed); border-color: var(--line); }
 
-    .inspector-status-badge.on-beat {
-      background: rgba(22, 101, 52, 0.12);
-      color: var(--green);
-      border: 1px solid rgba(22, 101, 52, 0.25);
-    }
-
-    .inspector-status-badge.early {
-      background: rgba(245, 158, 11, 0.15);
-      color: #b45309;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .inspector-status-badge.late {
-      background: rgba(153, 27, 27, 0.1);
-      color: var(--red);
-      border: 1px solid rgba(153, 27, 27, 0.25);
-    }
-
-    .inspector-status-badge.missed {
-      background: #f3f4f6;
-      color: #6b7280;
-      border: 1px solid #d1d5db;
-    }
-
-    /* ── Avartan (Cycle) Switcher for Multi-Cycle Audio ── */
+    /* Cycle switcher */
     .cycle-switcher-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      background: #faf6f0;
-      padding: 8px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      background: var(--ivory); padding: 8px 14px; border-radius: 4px; border: 1px solid var(--line);
     }
-
-    .cycle-switcher-label {
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: var(--muted);
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-    }
-
-    .cycle-pills-list {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
+    .cycle-switcher-label { font-size: 11px; font-weight: 600; color: var(--brown); font-family: var(--font-deva); }
+    .cycle-pills-list { display: flex; gap: 8px; flex-wrap: wrap; }
     .cycle-pill-btn {
-      padding: 4px 14px;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      background: #ffffff;
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--text);
-      cursor: pointer;
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-      transition: all .2s ease;
+      padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--sand);
+      font-size: 12px; font-weight: 600; font-family: var(--font-deva); transition: all .15s ease;
     }
+    .cycle-pill-btn:hover { border-color: var(--vermillion); color: var(--vermillion); }
+    .cycle-pill-btn.active { background: var(--vermillion); color: var(--ivory); border-color: var(--vermillion); }
 
-    .cycle-pill-btn:hover {
-      border-color: var(--terracotta);
-      color: var(--terracotta);
-    }
-
-    .cycle-pill-btn.active {
-      background: var(--terracotta);
-      color: #ffffff;
-      border-color: var(--terracotta);
-      box-shadow: 0 2px 8px rgba(154, 52, 18, 0.35);
-    }
-
-    /* ── The Correct Time & Bol Slider ── */
-    .bol-slider-wrapper {
-      position: relative;
-      user-select: none;
-      padding-top: 4px;
-    }
-
+    /* Canonical slider */
+    .bol-slider-wrapper { position: relative; user-select: none; }
     .slider-track-legend {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: 600;
+      display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: var(--brown);
     }
-
     .slider-timeline-track {
-      position: relative;
-      height: 72px;
-      background: #ffffff;
-      border: 1.5px solid #d9ccbc;
-      border-radius: 10px;
-      cursor: pointer;
-      overflow: hidden;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+      position: relative; height: 78px; background: var(--ivory);
+      border: 1px solid var(--line); border-radius: 4px; cursor: pointer; overflow: hidden;
     }
-
     .slider-progress-fill {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 0%;
-      background: linear-gradient(90deg, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 138, 0.35) 100%);
-      pointer-events: none;
-      transition: width 0.05s linear;
+      position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+      background: linear-gradient(90deg, rgba(216, 206, 172, 0.45), rgba(216, 206, 172, 0.25));
+      pointer-events: none; transition: width 0.05s linear;
     }
-
-    /* Scrubber needle / thumb */
     .slider-scrubber-line {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: var(--terracotta);
-      pointer-events: none;
-      left: 0%;
-      z-index: 10;
-      transform: translateX(-50%);
-      transition: left 0.05s linear;
-      box-shadow: 0 0 6px rgba(154, 52, 18, 0.6);
+      position: absolute; top: 0; bottom: 0; width: 2px; left: 0%; z-index: 10;
+      background: var(--vermillion); pointer-events: none; transform: translateX(-50%); transition: left 0.05s linear;
     }
-
     .slider-scrubber-thumb {
-      position: absolute;
-      top: 50%;
-      width: 18px;
-      height: 18px;
-      background: var(--terracotta);
-      border: 2.5px solid #fff;
-      border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      cursor: grab;
-      z-index: 11;
-      left: 0%;
-      transform: translate(-50%, -50%);
-      transition: left 0.05s linear;
+      position: absolute; top: 50%; left: 0%; width: 16px; height: 16px; z-index: 11;
+      background: var(--vermillion); border: 2.5px solid var(--ivory); border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(66,44,33,0.3); cursor: grab;
+      transform: translate(-50%, -50%); transition: left 0.05s linear;
     }
-
-    /* Canonical Bols along the track */
     .canonical-bol-marker {
-      position: absolute;
-      top: 6px;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      pointer-events: auto;
-      cursor: pointer;
-      z-index: 4;
-      transition: transform .2s ease;
+      position: absolute; top: 7px; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      cursor: pointer; z-index: 4; transition: transform .2s ease;
     }
-
-    .canonical-bol-marker:hover {
-      transform: translateX(-50%) scale(1.15);
-    }
-
-    .canonical-bol-marker.active {
-      transform: translateX(-50%) scale(1.2);
-      z-index: 8;
-    }
-
+    .canonical-bol-marker:hover { transform: translateX(-50%) scale(1.12); }
+    .canonical-bol-marker.active { transform: translateX(-50%) scale(1.18); z-index: 8; }
     .bol-chip-tag {
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 5px;
-      border-radius: 4px;
-      background: rgba(120, 53, 15, 0.08);
-      color: var(--accent-dark);
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-      border: 1px solid rgba(120, 53, 15, 0.18);
-      white-space: nowrap;
-      transition: all .2s;
+      font-size: 12px; font-weight: 600; padding: 1px 6px; border-radius: 3px; white-space: nowrap;
+      background: var(--sand); color: var(--espresso); border: 1px solid var(--line);
+      font-family: var(--font-deva); transition: all .15s;
     }
-
-    .canonical-bol-marker.sam .bol-chip-tag {
-      background: rgba(22, 101, 52, 0.15);
-      color: var(--green);
-      border-color: var(--green);
-      font-weight: 800;
-    }
-
-    .canonical-bol-marker.khali .bol-chip-tag {
-      background: rgba(30, 64, 175, 0.15);
-      color: var(--blue);
-      border-color: var(--blue);
-    }
-
-    .canonical-bol-marker.active .bol-chip-tag {
-      background: var(--terracotta);
-      color: #ffffff;
-      border-color: var(--terracotta);
-      box-shadow: 0 2px 8px rgba(154, 52, 18, 0.4);
-    }
-
-    .bol-matra-num {
-      font-size: 0.56rem;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    /* Vibhag boundary partition bar on slider */
-    .slider-vibhag-divider {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #cfc1b0;
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    .slider-vibhag-divider.avartan-end {
-      width: 4px;
-      border-left: 1.5px solid #a8947f;
-      border-right: 1.5px solid #a8947f;
-      background: transparent;
-    }
-
-    /* Dancer strike onset pins on lower portion of track */
+    .canonical-bol-marker.sam .bol-chip-tag { background: rgba(83,91,53,.12); color: var(--sam); border-color: var(--sam); font-weight: 700; }
+    .canonical-bol-marker.khali .bol-chip-tag { background: rgba(63,95,127,.1); color: var(--khali); border-color: var(--khali); }
+    .canonical-bol-marker.active .bol-chip-tag { background: var(--vermillion); color: var(--ivory); border-color: var(--vermillion); }
+    .bol-matra-num { font-size: 9px; color: var(--brown); font-weight: 600; }
+    .slider-vibhag-divider { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); z-index: 2; pointer-events: none; }
     .user-strike-pin {
-      position: absolute;
-      bottom: 6px;
-      transform: translateX(-50%);
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      z-index: 5;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      position: absolute; bottom: 8px; transform: translateX(-50%);
+      width: 8px; height: 8px; border-radius: 50%; z-index: 5; box-shadow: 0 0 0 2px var(--ivory);
     }
+    .user-strike-pin.on-beat { background: var(--ok); }
+    .user-strike-pin.early { background: var(--early); }
+    .user-strike-pin.late { background: var(--late); }
+    .user-strike-pin.missed { background: var(--missed); width: 6px; height: 6px; border-radius: 0; transform: translateX(-50%) rotate(45deg); }
 
-    .user-strike-pin.on-beat {
-      background: var(--green);
-    }
+    .status-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 10px; color: var(--brown); margin-top: 8px; }
+    .status-legend-item { display: flex; align-items: center; gap: 5px; }
+    .status-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
 
-    .user-strike-pin.early {
-      background: #f59e0b;
-    }
-
-    .user-strike-pin.late {
-      background: var(--red);
-    }
-
-    .user-strike-pin.missed {
-      background: #9ca3af;
-      width: 6px;
-      height: 6px;
-      border-radius: 0;
-      transform: translateX(-50%) rotate(45deg);
-    }
-
-    /* ── Authentic Kathak Vibhag Notation Visualization ── */
-    .kathak-notation-board {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .kathak-shastra-banner {
-      background: linear-gradient(135deg, #fef7ed 0%, #faede1 100%);
-      border: 1px solid #ebd9c2;
-      border-radius: 10px;
-      padding: 12px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .shastra-title {
-      font-size: 1.02rem;
-      font-weight: 800;
-      color: var(--accent-dark);
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .shastra-rules {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-
+    /* Bhatkhande notation board */
+    .kathak-notation-board { display: flex; flex-direction: column; gap: 16px; }
+    .kathak-shastra-banner { display: flex; flex-direction: column; gap: 10px; }
+    .shastra-title { font-family: var(--font-serif); font-size: 19px; line-height: 1.3; }
+    .shastra-rules { display: flex; gap: 8px; flex-wrap: wrap; }
     .rule-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: #ffffff;
-      border: 1px solid var(--border);
+      padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      background: var(--sand); border: 1px solid var(--line); font-family: var(--font-deva);
     }
+    .rule-chip.sam { color: var(--sam); border-color: rgba(83,91,53,.35); }
+    .rule-chip.taali { color: var(--taali); border-color: rgba(150,62,49,.3); }
+    .rule-chip.khali { color: var(--khali); border-color: rgba(63,95,127,.3); }
 
-    .rule-chip.sam {
-      color: var(--green);
-      border-color: rgba(22, 101, 52, 0.3);
-    }
-
-    .rule-chip.taali {
-      color: var(--terracotta);
-      border-color: rgba(154, 52, 18, 0.3);
-    }
-
-    .rule-chip.khali {
-      color: var(--blue);
-      border-color: rgba(30, 64, 175, 0.3);
-    }
-
-    /* Classical Avartans (Cycles) Rows Container */
-    .avartans-container {
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-    }
-
+    .avartans-container { display: flex; flex-direction: column; gap: 20px; }
     .avartan-block {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #fffdfa;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      box-shadow: 0 2px 10px rgba(120, 53, 15, 0.03);
+      display: flex; flex-direction: column; gap: 12px;
+      background: var(--sand); border: 1px solid var(--line); border-radius: 4px; padding: 14px;
     }
-
-    .avartan-hdr {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 14px;
-      background: #faf6f0;
-      border: 1px solid rgba(217, 119, 6, 0.2);
-      border-radius: 8px;
-    }
-
-    .avartan-hdr-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .avartan-badge {
-      font-weight: 800;
-      font-size: 0.85rem;
-      color: var(--terracotta);
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-    }
-
+    .avartan-hdr { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 2px 4px; }
+    .avartan-hdr-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .avartan-badge { font-family: var(--font-serif); font-size: 17px; }
     .avartan-range {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--accent);
-      background: rgba(217, 119, 6, 0.1);
-      padding: 2px 8px;
-      border-radius: 12px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: var(--vermillion);
+      border: 1px solid rgba(150,62,49,.3); padding: 2px 9px; border-radius: 999px; font-family: var(--font-deva);
     }
+    .avartan-hdr-right { font-size: 11px; color: var(--brown); font-family: var(--font-deva); }
 
-    .avartan-hdr-right {
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: var(--muted);
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-    }
-
-    /* The 4 Vibhags Grid */
-    .vibhags-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-    }
-
-    @media (max-width: 980px) {
-      .vibhags-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 540px) {
-      .vibhags-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .vibhags-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 900px) { .vibhags-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+    @media (max-width: 560px) { .vibhags-grid { grid-template-columns: 1fr !important; } }
 
     .vibhag-card {
-      background: #fffdfa;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 2px 8px rgba(120, 53, 15, 0.04);
-      transition: all .25s ease;
-      position: relative;
+      background: var(--ivory); border: 1px solid var(--line); border-top: 3px solid var(--line);
+      border-radius: 4px; overflow: hidden; display: flex; flex-direction: column;
     }
-
-    .vibhag-card.sam-vibhag {
-      border-color: rgba(22, 101, 52, 0.35);
-    }
-
-    .vibhag-card.taali-vibhag {
-      border-color: rgba(154, 52, 18, 0.3);
-    }
-
-    .vibhag-card.khali-vibhag {
-      border-color: rgba(30, 64, 175, 0.3);
-    }
-
+    .vibhag-card.sam-vibhag { border-top-color: var(--sam); }
+    .vibhag-card.taali-vibhag { border-top-color: var(--taali); }
+    .vibhag-card.khali-vibhag { border-top-color: var(--khali); }
     .vibhag-card-hdr {
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1.5px solid var(--border);
-      background: #faf6f0;
+      padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      border-bottom: 1px solid var(--line-soft);
     }
-
-    .vibhag-card.sam-vibhag .vibhag-card-hdr {
-      background: rgba(22, 101, 52, 0.08);
-      border-color: rgba(22, 101, 52, 0.2);
-    }
-
-    .vibhag-card.taali-vibhag .vibhag-card-hdr {
-      background: rgba(154, 52, 18, 0.06);
-      border-color: rgba(154, 52, 18, 0.15);
-    }
-
-    .vibhag-card.khali-vibhag .vibhag-card-hdr {
-      background: rgba(30, 64, 175, 0.06);
-      border-color: rgba(30, 64, 175, 0.15);
-    }
-
-    .vibhag-title-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .vibhag-hdr-title {
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: var(--text);
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-    }
-
-    .vibhag-hdr-kriya {
-      font-size: 0.68rem;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
+    .vibhag-title-wrap { display: flex; flex-direction: column; gap: 1px; }
+    .vibhag-hdr-title { font-size: 12px; font-weight: 600; font-family: var(--font-deva); }
+    .vibhag-hdr-kriya { font-size: 10px; color: var(--brown); font-family: var(--font-deva); }
     .vibhag-sign-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      font-weight: 800;
-      flex-shrink: 0;
-      font-family: 'Inter', sans-serif;
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-serif); font-size: 15px; color: var(--ivory);
     }
+    .vibhag-sign-badge.sam { background: var(--sam); }
+    .vibhag-sign-badge.taali { background: var(--taali); }
+    .vibhag-sign-badge.khali { background: var(--khali); }
 
-    .vibhag-sign-badge.sam {
-      background: var(--green);
-      color: #ffffff;
-      box-shadow: 0 2px 6px rgba(22, 101, 52, 0.3);
-    }
-
-    .vibhag-sign-badge.taali {
-      background: var(--terracotta);
-      color: #ffffff;
-      box-shadow: 0 2px 6px rgba(154, 52, 18, 0.3);
-    }
-
-    .vibhag-sign-badge.khali {
-      background: var(--blue);
-      color: #ffffff;
-      box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3);
-    }
-
-    /* 4 Matra Rows/Cells in each Vibhag */
-    .vibhag-cells-container {
-      display: flex;
-      flex-direction: column;
-    }
-
+    .vibhag-cells-container { display: flex; flex-direction: column; }
     .kathak-matra-cell {
-      padding: 10px 12px;
-      border-bottom: 1px solid #f0e9df;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: all .2s ease;
-      background: #ffffff;
-      position: relative;
+      padding: 10px 12px; border-bottom: 1px solid var(--line-soft);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      cursor: pointer; transition: background .15s ease, box-shadow .15s ease; position: relative;
     }
-
-    .kathak-matra-cell:last-child {
-      border-bottom: none;
-    }
-
-    .kathak-matra-cell:hover {
-      background: #fff8ef;
-    }
-
-    .kathak-matra-cell.active-matra {
-      background: linear-gradient(90deg, #fef3c7 0%, #fffdfa 100%);
-      box-shadow: inset 4px 0 0 var(--accent);
-      transform: scale(1.02);
-      z-index: 3;
-    }
-
-    .kathak-matra-cell.past-audio {
-      opacity: 0.45;
-      cursor: default;
-      background: #fbf9f6;
-    }
-
-    .kathak-matra-cell.past-audio:hover {
-      background: #fbf9f6;
-    }
-
-    .matra-cell-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .matra-index-badge {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--muted);
-      min-width: 28px;
-    }
-
-    .matra-bol-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-    }
-
-    .matra-bol-dev {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.2;
-    }
-
-    .matra-bol-rom {
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .matra-cell-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 3px;
-    }
-
-    /* Performance Diagnosis Badges */
+    .kathak-matra-cell:last-child { border-bottom: none; }
+    .kathak-matra-cell:hover { background: var(--sand); }
+    .kathak-matra-cell.active-matra { background: #ebdcb9; box-shadow: inset 3px 0 0 var(--vermillion); }
+    .kathak-matra-cell.active-matra .matra-bol-dev { color: var(--vermillion); }
+    .kathak-matra-cell.past-audio { opacity: 0.45; cursor: default; }
+    .kathak-matra-cell.past-audio:hover { background: transparent; }
+    .matra-cell-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .matra-index-badge { font-size: 10px; font-weight: 600; color: var(--brown); min-width: 30px; font-family: var(--font-deva); }
+    .matra-bol-info { display: flex; flex-direction: column; min-width: 0; }
+    .matra-bol-dev { font-family: var(--font-serif); font-size: 20px; line-height: 1.15; transition: color .15s; }
+    .matra-bol-rom { font-size: 10px; color: var(--brown); font-family: var(--font-deva); }
+    .matra-cell-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
     .diag-pill {
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-variant-numeric: tabular-nums;
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 3px; font-variant-numeric: tabular-nums; font-family: var(--font-deva);
+      color: var(--brown);
     }
+    .diag-pill.on-beat { background: rgba(79,107,44,.1); color: var(--ok); border: 1px solid rgba(79,107,44,.28); }
+    .diag-pill.early { background: rgba(176,122,26,.12); color: var(--early); border: 1px solid rgba(176,122,26,.3); }
+    .diag-pill.late { background: rgba(150,62,49,.07); color: var(--late); border: 1px solid rgba(150,62,49,.25); }
+    .diag-pill.missed { background: #efe9dc; color: var(--missed); border: 1px solid var(--line); }
+    .matra-gesture-note { font-size: 9px; color: var(--brown); font-family: var(--font-deva); }
 
-    .diag-pill.on-beat {
-      background: rgba(22, 101, 52, 0.1);
-      color: var(--green);
-      border: 1px solid rgba(22, 101, 52, 0.2);
-    }
-
-    .diag-pill.early {
-      background: rgba(245, 158, 11, 0.12);
-      color: #b45309;
-      border: 1px solid rgba(245, 158, 11, 0.25);
-    }
-
-    .diag-pill.late {
-      background: rgba(153, 27, 27, 0.08);
-      color: var(--red);
-      border: 1px solid rgba(153, 27, 27, 0.2);
-    }
-
-    .diag-pill.missed {
-      background: #f3f4f6;
-      color: #6b7280;
-      border: 1px solid #d1d5db;
-    }
-
-    .matra-gesture-note {
-      font-size: 0.62rem;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    /* ── Bols ── */
-    .bol-tokens {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
+    /* ── Bols card ─────────────────────────────────────────────────────────── */
+    .eval-card-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown); }
+    .bol-count-line { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--vermillion); }
+    .bol-tokens { display: flex; flex-wrap: wrap; gap: 6px; }
     .bol-token {
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      background: rgba(180, 83, 9, .08);
-      border: 1px solid rgba(180, 83, 9, .2);
-      color: var(--accent-dark);
+      padding: 5px 12px; border-radius: 3px; font-size: 13px; font-weight: 500;
+      background: var(--sand); border: 1px solid var(--line);
     }
-
-    /* ── Feedback ── */
-    .feedback-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .feedback-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 0.86rem;
-      background: #faf6f0;
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--muted);
-      box-shadow: var(--shadow);
-    }
-
-    .feedback-item.EXCELLENT {
-      border-left-color: var(--green);
-      background: rgba(22, 101, 52, .04);
-    }
-
-    .feedback-item.INFO {
-      border-left-color: var(--blue);
-      background: rgba(30, 64, 175, .04);
-    }
-
-    .feedback-item.WARNING {
-      border-left-color: var(--accent);
-      background: rgba(180, 83, 9, .04);
-    }
-
-    .feedback-item.CRITICAL {
-      border-left-color: var(--red);
-      background: rgba(153, 27, 27, .04);
-    }
-
-    .feedback-icon {
-      font-size: 1.05rem;
-      margin-top: 1px;
-      flex-shrink: 0;
-    }
-
-    .feedback-cat {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 2px;
-      letter-spacing: 0.5px;
-    }
-
-    /* ── Swipeable Visual Diagnostics Carousel ── */
-    .carousel-container {
-      position: relative;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .carousel-track-wrapper {
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      display: flex;
-      gap: 16px;
-      padding-bottom: 12px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--accent) var(--border);
-    }
-
-    .carousel-track-wrapper::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .carousel-track-wrapper::-webkit-scrollbar-track {
-      background: #faf6f0;
-      border-radius: 4px;
-    }
-
-    .carousel-track-wrapper::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 4px;
-    }
-
-    .carousel-slide {
-      flex: 0 0 100%;
-      scroll-snap-align: start;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .slide-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--accent-dark);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .plot-img {
-      width: 100%;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      display: block;
-      background: #fff;
-    }
-
-    .carousel-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    .carousel-btn {
-      background: #faf6f0;
-      border: 1px solid var(--border);
-      color: var(--accent-dark);
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s, border-color .2s;
-    }
-
-    .carousel-btn:hover {
-      background: #fef3c7;
-      border-color: var(--accent);
-    }
-
-    .carousel-dots {
-      display: flex;
-      gap: 6px;
-    }
-
-    .carousel-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      cursor: pointer;
-      transition: background .2s;
-    }
-
-    .carousel-dot.active {
-      background: var(--accent);
-    }
-
-    /* ── Transcript ── */
     .transcript-box {
-      background: #faf6f0;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 14px;
-      font-size: 0.85rem;
-      color: #44403c;
-      line-height: 1.6;
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-      max-height: 100px;
-      overflow-y: auto;
+      background: var(--sand); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px;
+      font-family: var(--font-serif); font-size: 18px; line-height: 1.6; max-height: 130px; overflow-y: auto;
     }
 
-    /* ── Section header ── */
-    .section-hdr {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin: 28px 0 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text);
+    /* ── Guru feedback ─────────────────────────────────────────────────────── */
+    .feedback-list { display: flex; flex-direction: column; gap: 10px; }
+    .feedback-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px;
+      background: var(--sand); border: 1px solid var(--line); border-left: 3px solid var(--brown);
+      border-radius: 4px; font-size: 13px; line-height: 1.55;
     }
+    .feedback-item.EXCELLENT { border-left-color: var(--ok); }
+    .feedback-item.INFO { border-left-color: var(--khali); }
+    .feedback-item.WARNING { border-left-color: var(--early); }
+    .feedback-item.CRITICAL { border-left-color: var(--late); }
+    .feedback-icon { font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+    .feedback-cat { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown); margin-bottom: 2px; }
 
-    .section-hdr::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
+    /* ── Plots carousel ────────────────────────────────────────────────────── */
+    .carousel-track-wrapper {
+      overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+      display: flex; gap: 16px; padding-bottom: 10px;
+      scrollbar-width: thin; scrollbar-color: var(--vermillion) var(--line-soft);
     }
+    .carousel-track-wrapper::-webkit-scrollbar { height: 4px; }
+    .carousel-track-wrapper::-webkit-scrollbar-track { background: var(--line-soft); }
+    .carousel-track-wrapper::-webkit-scrollbar-thumb { background: var(--vermillion); }
+    .carousel-slide { flex: 0 0 100%; scroll-snap-align: start; display: flex; flex-direction: column; gap: 10px; }
+    .slide-title {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown);
+    }
+    .plot-img { width: 100%; border-radius: 4px; border: 1px solid var(--line); display: block; background: #fff; min-height: 120px; }
+    .carousel-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 12px; border-top: 1px solid var(--line);
+    }
+    .carousel-btn {
+      background: var(--ivory); border: 1px solid var(--line); padding: 7px 14px;
+      border-radius: 4px; font-size: 11px; font-weight: 500; transition: all .15s;
+    }
+    .carousel-btn:hover { background: var(--sand-2); border-color: var(--espresso); }
+    .carousel-dots { display: flex; gap: 6px; }
+    .carousel-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); cursor: pointer; transition: background .2s; }
+    .carousel-dot.active { background: var(--vermillion); }
 
-    /* ── Processing time ── */
-    .proc-time {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.78rem;
-      margin-top: 20px;
+    /* End actions */
+    .evaluation-end {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      padding-top: 16px; border-top: 1px solid var(--line);
     }
-
-    /* ── Vibhag Legend ── */
-    .vibhag-legend {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: #faf6f0;
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 10px;
-      margin-bottom: 14px;
-      font-size: 0.8rem;
-      align-items: center;
+    .proc-time { font-size: 11px; color: var(--brown); }
+    .practice-again-btn {
+      background-color: var(--vermillion); color: var(--ivory); border-radius: 4px;
+      padding: 10px 18px; font-size: 12px; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.15s ease;
     }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 500;
-    }
-
-    .legend-sym {
-      width: 24px;
-      height: 24px;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 0.85rem;
-      border: 1.5px solid;
-    }
-
-    .legend-sym.sam {
-      background: rgba(22, 101, 52, 0.15);
-      color: var(--green);
-      border-color: var(--green);
-    }
-
-    .legend-sym.taali {
-      background: rgba(153, 27, 27, 0.12);
-      color: var(--red);
-      border-color: var(--red);
-    }
-
-    .legend-sym.khali {
-      background: rgba(30, 64, 175, 0.12);
-      color: var(--blue);
-      border-color: var(--blue);
-    }
-
-    /* Status dots legend */
-    .status-legend {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 10px;
-      padding: 8px 12px;
-      background: #faf6f0;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-
-    .status-legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .status-legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
+    .practice-again-btn:hover { background-color: var(--vermillion-dk); }
+    .practice-again-btn svg { width: 14px; height: 14px; stroke: var(--ivory); fill: none; }
   </style>
 </head>
 
 <body>
 
-  <!-- ── COMPACT WARM HERO HEADER ──────────────────────── -->
-  <header class="hero">
-    <div class="hero-content">
+  <!-- ── SVG Sprite ─────────────────────────────────────────────────────────── -->
+  <div style="display:none;">
+    <svg viewBox="0 0 120 120" id="svg-mandala-red">
+      <g fill="none" stroke="#963E31" stroke-width="1.3">
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(0 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(30 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(60 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(90 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(120 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(150 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(180 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(210 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(240 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(270 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(300 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(330 60 60)"/>
+        <circle cx="60" cy="60" r="15"/><circle cx="60" cy="60" r="53"/>
+      </g>
+    </svg>
+    <svg viewBox="0 0 120 120" id="svg-mandala-gold">
+      <g fill="none" stroke="#D8CEAC" stroke-width="1.3">
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(0 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(30 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(60 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(90 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(120 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(150 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(180 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(210 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(240 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(270 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(300 60 60)"/>
+        <ellipse cx="60" cy="34" rx="7" ry="23" transform="rotate(330 60 60)"/>
+        <circle cx="60" cy="60" r="15"/><circle cx="60" cy="60" r="53"/>
+      </g>
+    </svg>
+    <svg viewBox="0 0 1120 20" id="svg-textile-border">
+      <g fill="none" stroke="#963E31" stroke-width=".7" opacity=".6" id="textile-g">
+        <path d="M0 0h1120M0 20h1120"/>
+      </g>
+    </svg>
+    <svg id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <svg id="icon-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <svg id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <svg id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <svg id="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    <svg id="icon-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" stroke="none"/></svg>
+    <svg id="icon-waveform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v4M6 6v12M10 3v18M14 8v8M18 5v14M22 10v4"/></svg>
+    <svg id="icon-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+    <svg id="icon-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+  </div>
 
-      <div style="text-align: left;">
-        <h1>Kathak AI</h1>
-        <p class="subtitle">AI-powered Tala rhythm tracking, bol recognition &amp; performance evaluation</p>
+  <!-- ── Loading Modal with Pipeline Stages ─────────────────────────────────── -->
+  <div class="loading-modal-backdrop" id="loader">
+    <div class="loading-modal">
+      <svg class="spinner-rosette" viewBox="0 0 120 120"><use href="#svg-mandala-red"></use></svg>
+      <div class="loading-title">Analyzing your practice</div>
+      <div class="loader-stages">
+        <div class="loader-stage" id="s1"><div class="stage-dot"></div>Stage 1 — Extracting spectral features…</div>
+        <div class="loader-stage" id="s2"><div class="stage-dot"></div>Stage 2 — Tracking Tala &amp; Matra grid…</div>
+        <div class="loader-stage" id="s3"><div class="stage-dot"></div>Stage 3 — Transcribing Kathak bols (Whisper)…</div>
+        <div class="loader-stage" id="s4"><div class="stage-dot"></div>Stage 4 — Evaluating performance…</div>
       </div>
     </div>
-    <div class="pillars-badge">
-      <span class="badge badge-amber">Stage 1: Spectrogram &amp; MFCCs</span>
-      <span class="badge badge-brown">Stage 2: Teental Matra Grid</span>
-      <span class="badge badge-green">Stage 3: Bol Recognition</span>
-      <span class="badge badge-terra">Stage 4: Guru Evaluation</span>
-    </div>
-  </header>
+  </div>
 
-  <main class="container">
+  <div class="studio-wrapper">
 
-    <!-- ════════════ SCREEN 1: HOME / UPLOAD ════════════ -->
+    <!-- ════════════ SCREEN 1: STUDIO / UPLOAD ════════════ -->
     <div id="homeScreen" class="screen active">
-      <div class="grid-3">
 
-        <!-- Upload Zone -->
-        <div class="card">
-          <div class="card-title">Upload Recording</div>
-          <div class="upload-zone" id="dropZone">
-            <input type="file" id="fileInput" accept=".wav,.mp3,.flac" />
-            <span class="upload-icon">🎵</span>
-            <h2>Drop your Kathak audio here</h2>
-            <p>or click to select a WAV / MP3 / FLAC file</p>
+      <header class="studio-identity">
+        <div class="brand-left">
+          <svg class="brand-rosette" viewBox="0 0 120 120"><use href="#svg-mandala-red"></use></svg>
+          <div class="brand-copy">
+            <h2 class="brand-name">Kathak AI</h2>
+            <p class="brand-caption">The art of practice &nbsp;·&nbsp; A digital companion for your riyaaz</p>
           </div>
-          <p id="selectedFile" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></p>
+        </div>
+        <div class="pill">Tradition in every beat. Possibility in every practice.</div>
+      </header>
 
-          <!-- Tala Mode Selection Dropdown -->
-          <div style="margin-top:12px;margin-bottom:12px;text-align:left;">
-            <label for="taalSelector"
-              style="display:block;font-size:0.8rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;">
-              🎯 ताल चयन (Tala Selection / Mode):
-            </label>
-            <select id="taalSelector"
-              style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;background:#faf6f0;color:var(--text);font-family:inherit;font-weight:600;cursor:pointer;">
+      <div class="textile-border-container" aria-hidden="true">
+        <svg viewBox="0 0 1120 20" preserveAspectRatio="none"><use href="#svg-textile-border"></use></svg>
+      </div>
+
+      <section class="welcome-panel">
+        <div class="welcome-copy">
+          <p class="eyebrow">AI-powered tala tracking · bol recognition · evaluation</p>
+          <h1 class="welcome-title">Your riyaaz, reimagined.</h1>
+          <p class="welcome-description">
+            Rooted in tradition. Guided by intelligence. Explore your laya, refine your bols, and bring intention to every beat.
+          </p>
+          <p class="welcome-notation">Taal &nbsp;/&nbsp; Laya &nbsp;/&nbsp; Padhant</p>
+        </div>
+        <div class="classical-arch">
+          <svg class="arch-rosette" viewBox="0 0 120 120"><use href="#svg-mandala-gold"></use></svg>
+          <h2 class="arch-hindi">तत् तत् थई</h2>
+          <p class="arch-caption">The rhythm within</p>
+        </div>
+      </section>
+
+      <section class="section-header">
+        <p class="eyebrow">01 &nbsp;/&nbsp; Record &amp; refine</p>
+        <h2 class="section-title">Begin your practice</h2>
+      </section>
+
+      <div class="practice-grid">
+
+        <!-- Upload -->
+        <div class="practice-card">
+          <div class="card-icon-row"><svg viewBox="0 0 24 24"><use href="#icon-upload"></use></svg></div>
+          <h2 class="card-heading">Upload recording</h2>
+          <p class="card-desc">Bring your practice to the studio. Start with an audio recording.</p>
+
+          <div class="audio-drop-area" id="dropZone">
+            <input type="file" id="fileInput" accept=".wav,.mp3,.flac" style="display:none;" />
+            <svg viewBox="0 0 24 24"><use href="#icon-music"></use></svg>
+            <div class="drop-caption">Drop your Kathak audio here</div>
+            <div class="drop-formats">or click to select WAV, MP3 or FLAC</div>
+          </div>
+          <p class="selected-file-badge" id="selectedFile"></p>
+
+          <div class="tala-select-group">
+            <label class="tala-label" for="taalSelector">ताल चयन · Tala selection</label>
+            <select class="tala-select" id="taalSelector">
               <option value="Auto" selected>✨ ऑटो-डिटेक्ट ताल (Auto-Detect from Recited Bols)</option>
               <option value="Teental">तीनताल (Teental — 16 मात्रा, 4+4+4+4)</option>
               <option value="Jhaptaal">झपताल (Jhaptaal — 10 मात्रा, 2+3+2+3)</option>
               <option value="Kehrava">कहरवा (Kehrava — 8 मात्रा, 4+4)</option>
               <option value="Dadra">दादरा (Dadra — 6 मात्रा, 3+3)</option>
             </select>
-            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">
-              झपताल (10), दादरा (6), कहरवा (8) या तीनताल (16) — बोल सुनकर स्वचालित ताल पहचान
-            </div>
+            <div class="tala-hint">झपताल (10), दादरा (6), कहरवा (8) या तीनताल (16) — बोल सुनकर स्वचालित ताल पहचान</div>
           </div>
 
-          <button class="btn-analyze" id="analyzeBtn" disabled>Analyze Performance</button>
+          <button class="cta-btn-primary" id="analyzeBtn" disabled>
+            <span>Analyze performance</span>
+            <svg viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg>
+          </button>
         </div>
 
-        <!-- Record Zone -->
-        <div class="card">
-          <div class="card-title">🎙️ Record Live</div>
-          <div class="record-zone" id="recordZone">
-            <div class="record-label" id="recordLabel">Tap to start recording your Kathak padhant</div>
-            <button class="record-btn" id="recordBtn">
-              <div class="record-btn-inner"></div>
+        <!-- Record -->
+        <div class="practice-card">
+          <div class="card-icon-row"><svg viewBox="0 0 24 24"><use href="#icon-mic"></use></svg></div>
+          <h2 class="card-heading">Record your padhant</h2>
+          <p class="card-desc">Find a quiet space. Take a breath. Let your bols lead the way.</p>
+
+          <div class="recording-well" id="recordZone">
+            <button class="mic-circle" id="recordBtn" title="Tap to record">
+              <svg viewBox="0 0 24 24" id="recordIcon"><use href="#icon-mic"></use></svg>
             </button>
+            <div class="record-status" id="recordLabel">Tap to start recording your Kathak padhant</div>
             <div class="record-timer" id="recordTimer">00:00</div>
             <canvas class="record-waveform" id="recordWaveform"></canvas>
+            <div class="record-note">Live recording</div>
             <div class="record-preview" id="recordPreview">
               <audio id="recordedAudio" controls></audio>
               <div class="record-actions">
                 <button class="btn-sm" id="discardRecording">Discard</button>
-                <button class="btn-sm primary" id="useRecording">Use for Analysis</button>
+                <button class="btn-sm primary" id="useRecording">Use for analysis</button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Sample Library -->
-        <div class="card">
-          <div class="card-title">Sample Library</div>
+        <div class="practice-card">
+          <div class="card-icon-row"><svg viewBox="0 0 24 24"><use href="#icon-music"></use></svg></div>
+          <h2 class="card-heading">Sample library</h2>
+          <p class="card-desc">Listen to a recording, then tap its name to select it for analysis.</p>
           <div class="library-list" id="libraryList">
-            <div style="color:var(--muted);font-size:.85rem;">Loading…</div>
+            <div class="library-empty">Loading…</div>
           </div>
+          <p class="library-note">A foundation for every footstep.</p>
         </div>
 
       </div>
+
+      <section class="analysis-journey">
+        <h2 class="section-title">From sound to understanding</h2>
+        <div class="journey-steps">
+          <div class="journey-step-item"><span class="step-number">STAGE 01</span><h3 class="step-title">Listen</h3><p class="step-desc">Spectrogram &amp; MFCCs</p></div>
+          <div class="journey-step-item"><span class="step-number">STAGE 02</span><h3 class="step-title">Find the laya</h3><p class="step-desc">Tala &amp; matra grid</p></div>
+          <div class="journey-step-item"><span class="step-number">STAGE 03</span><h3 class="step-title">Read the bols</h3><p class="step-desc">Bol recognition</p></div>
+          <div class="journey-step-item"><span class="step-number">STAGE 04</span><h3 class="step-title">Reflect &amp; refine</h3><p class="step-desc">Guru evaluation</p></div>
+        </div>
+      </section>
+
+      <footer class="studio-footer">
+        <span class="footer-tradition">Made for the practice. In reverence to the art.</span>
+        <span class="pill" style="color:var(--olive)">Kathak AI engine</span>
+      </footer>
     </div><!-- /homeScreen -->
 
 
-    <!-- ════════════ SCREEN 2: LOADER & RESULTS ════════════ -->
+    <!-- ════════════ SCREEN 2: EVALUATION ════════════ -->
     <div id="resultsScreen" class="screen">
 
-      <!-- Top Navigation Bar with Back Button -->
-      <div class="nav-bar">
-        <button class="btn-back" id="backBtn">
-          ← Back to Upload &amp; Library
+      <div class="evaluation-context">
+        <button class="back-btn" id="backBtn">
+          <svg viewBox="0 0 24 24"><use href="#icon-arrow-left"></use></svg>
+          <span>Back to upload &amp; library</span>
         </button>
-        <div style="font-size: 0.85rem; color: var(--muted); font-weight: 500;" id="currentFilenameBadge"></div>
+        <span class="pill" id="currentFilenameBadge"></span>
       </div>
 
-      <!-- Loader State -->
-      <div class="loader" id="loader">
-        <div class="spinner"></div>
-        <div class="loader-stages">
-          <div class="loader-stage" id="s1">
-            <div class="stage-dot"></div>Stage 1 — Extracting spectral features…
-          </div>
-          <div class="loader-stage" id="s2">
-            <div class="stage-dot"></div>Stage 2 — Tracking Tala &amp; 16-Matra grid…
-          </div>
-          <div class="loader-stage" id="s3">
-            <div class="stage-dot"></div>Stage 3 — Transcribing Kathak bols (Whisper)…
-          </div>
-          <div class="loader-stage" id="s4">
-            <div class="stage-dot"></div>Stage 4 — Evaluating performance…
-          </div>
+      <div class="textile-border-container" aria-hidden="true">
+        <svg viewBox="0 0 1120 20" preserveAspectRatio="none"><use href="#svg-textile-border"></use></svg>
+      </div>
+
+      <div id="resultsContent" style="display:none; flex-direction:column; gap:32px;">
+
+        <div class="eval-title-group">
+          <p class="eyebrow">02 &nbsp;/&nbsp; Listen, reflect &amp; refine</p>
+          <h1 class="eval-main-title">Every beat tells a story.</h1>
+          <p class="eval-subtitle">Your practice, thoughtfully understood. A closer look at the rhythm and clarity of your padhant.</p>
         </div>
-      </div>
-
-      <!-- Actual Results Content (Hidden until analysis completes) -->
-      <div id="resultsContent" style="display:none;">
 
         <!-- Grade Banner -->
-        <div class="grade-banner" id="gradeBanner">
-          <div class="grade-left">
-            <h2 id="gradeTitle">—</h2>
-            <p id="gradeSubtitle">—</p>
+        <section class="performance-summary-banner" id="gradeBanner">
+          <div class="assessment-copy">
+            <p class="eyebrow">Your evaluation &nbsp;/&nbsp; Results</p>
+            <h2 class="assessment-title" id="gradeTitle">—</h2>
+            <p class="assessment-meta" id="gradeSubtitle">—</p>
           </div>
-          <div class="grade-circle" id="gradeCircle" style="--pct:0">
-            <div class="grade-inner">
-              <div class="grade-letter" id="gradeLetter">—</div>
-              <div class="grade-score" id="gradeScore">—</div>
-            </div>
+          <div class="overall-score-arch" id="gradeCircle">
+            <span class="overall-number" id="gradeLetter">—</span>
+            <span class="overall-caption">Composite score</span>
+            <span class="overall-grade" id="gradeScore">—</span>
           </div>
-        </div>
+        </section>
 
         <!-- 4 Pillars -->
-        <div class="section-hdr">⚖️ Four Pillars of Performance</div>
-        <div class="grid-4" id="pillarsGrid"></div>
+        <section class="section-header">
+          <p class="eyebrow">Four pillars of performance</p>
+        </section>
+        <div class="performance-pillars" id="pillarsGrid" style="margin-top:-20px;"></div>
 
-        <!-- Tala Info + Integrated Audio Playback & Bol Slider + Authentic Vibhag Notation -->
-        <div class="section-hdr">🥁 Tala &amp; Rhythm Analysis</div>
-        <div class="tala-header-card">
-          <!-- Active / Detected Tala Banner -->
-          <div id="detectedTalaBanner"
-            style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(135deg,#fef7ed,#faede1);border:1.5px solid var(--accent);border-radius:10px;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <span style="font-size:1.7rem;">🥁</span>
-              <div>
-                <div id="detectedTalaTitle"
-                  style="font-size:1.05rem;font-weight:800;color:var(--accent-dark);font-family:'Noto Sans Devanagari',sans-serif;">
-                  —</div>
-                <div id="detectedTalaSub" style="font-size:0.75rem;color:var(--muted);font-weight:600;">—</div>
-              </div>
-            </div>
-            <div id="detectedTalaBadge" class="badge badge-terra"
-              style="font-size:0.82rem;padding:6px 14px;font-weight:700;">—</div>
+        <!-- Tala & Rhythm -->
+        <section class="tala-analysis-card">
+          <div class="card-header-row">
+            <h2 class="card-title-serif">Tala &amp; rhythm</h2>
+            <span class="eval-card-badge">Matra-by-matra timing</span>
           </div>
 
-          <!-- Tala metrics chips -->
+          <div class="detected-tala-banner" id="detectedTalaBanner">
+            <div class="detected-tala-left">
+              <svg viewBox="0 0 120 120"><use href="#svg-mandala-red"></use></svg>
+              <div>
+                <div class="detected-tala-title" id="detectedTalaTitle">—</div>
+                <div class="detected-tala-sub" id="detectedTalaSub">—</div>
+              </div>
+            </div>
+            <div class="detected-tala-badge" id="detectedTalaBadge">—</div>
+          </div>
+
           <div class="tala-info" id="talaChips"></div>
 
-          <!-- Integrated Audio Playback & Interactive Bol Slider -->
           <div class="tala-player-box">
             <div class="tala-player-controls">
               <div class="tala-player-left">
-                <button class="play-btn-tala" id="playBtn" title="Play / Pause Analysis Audio">▶</button>
+                <button class="play-btn-tala" id="playBtn" title="Play / Pause Analysis Audio">
+                  <svg viewBox="0 0 24 24" id="playIcon"><use href="#icon-play"></use></svg>
+                </button>
                 <div class="playback-time-badge" id="playbackTime">0:00.0 / 0:00.0</div>
               </div>
               <div class="speed-btn-group">
-                <span style="font-size:0.68rem;color:var(--muted);margin-right:4px;font-weight:600;">Laya Speed:</span>
+                <span class="speed-lbl">Laya speed</span>
                 <button class="speed-btn" data-speed="0.5">0.5×</button>
                 <button class="speed-btn" data-speed="0.75">0.75×</button>
                 <button class="speed-btn active" data-speed="1.0">1.0×</button>
@@ -1924,97 +900,97 @@
               </div>
             </div>
 
-            <!-- Dynamic Live Diagnostic Readout as Slider moves -->
             <div class="matra-inspector-banner" id="liveInspector">
               <div class="inspector-bol-badge" id="inspectorBol">
-                <span>🎵</span> <span>Scrub the slider or click ▶ to inspect your padhant in time</span>
+                <span>🎵</span> <span>Scrub the slider or press play to inspect your padhant in time</span>
               </div>
               <div class="inspector-status-badge on-beat" id="inspectorBadge">
                 <span>Kathak Tala Grid Synchronized</span>
               </div>
             </div>
 
-            <!-- Avartan (Cycle) Switcher - active when audio is longer than 1 cycle -->
             <div class="cycle-switcher-wrap" id="cycleSwitcherWrap" style="display:none;">
               <span class="cycle-switcher-label">🔄 आवर्तन (Cycle):</span>
               <div class="cycle-pills-list" id="cyclePillsList"></div>
             </div>
 
-            <!-- The Single Canonical Tala Slider (Dynamically adapted to active Tala) -->
             <div class="bol-slider-wrapper">
-              <div class="slider-track-legend" id="sliderLegend">
+              <div class="slider-track-legend">
                 <span id="sliderLegendLeft">◀ Canonical 16-Matra Bol Grid (The Correct Time)</span>
                 <span id="sliderLegendRight">Your Strike Onsets (Early / Late Timing Error) ▶</span>
               </div>
               <div class="slider-timeline-track" id="sliderTrack">
                 <div class="slider-progress-fill" id="sliderFill"></div>
-                <!-- Canonical Matra Markers & Bol Pills added via JS -->
                 <div id="sliderMarkersContainer"></div>
-                <!-- User Strike Pins added via JS -->
                 <div id="sliderStrikesContainer"></div>
-                <!-- Scrubber Line and Thumb -->
                 <div class="slider-scrubber-line" id="sliderLine"></div>
                 <div class="slider-scrubber-thumb" id="sliderThumb"></div>
               </div>
+              <div class="status-legend">
+                <span class="status-legend-item"><span class="status-legend-dot" style="background:var(--ok)"></span>On-beat</span>
+                <span class="status-legend-item"><span class="status-legend-dot" style="background:var(--early)"></span>Early (rushing)</span>
+                <span class="status-legend-item"><span class="status-legend-dot" style="background:var(--late)"></span>Late (dragging)</span>
+                <span class="status-legend-item"><span class="status-legend-dot" style="background:var(--missed);border-radius:0;transform:rotate(45deg)"></span>Missed</span>
+              </div>
             </div>
           </div>
 
-          <!-- Authentic Kathak Vibhag Visualization (भातखंडे ताल लिपि) -->
+          <!-- Bhatkhande notation -->
           <div class="kathak-notation-board">
             <div class="kathak-shastra-banner">
-              <div class="shastra-title" id="shastraTitle">
-                <span>📖</span>
-                <span id="shastraTitleText">भातखंडे ताल लिपि (Vibhag Structure)</span>
-              </div>
+              <p class="eyebrow">Bhatkhande notation</p>
+              <div class="shastra-title" id="shastraTitleText">भातखंडे ताल लिपि (Vibhag Structure)</div>
               <div class="shastra-rules" id="shastraRules"></div>
             </div>
-
-            <!-- The Classical Avartan / Vibhags Rows Container -->
             <div class="avartans-container" id="vibhagsContainer"></div>
           </div>
-        </div>
+        </section>
 
         <!-- Bols -->
-        <div class="section-hdr">🗣️ Detected Kathak Bols</div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom:8px;">Normalized Tokens — <span id="bolCount"
-              style="color:var(--accent)"></span></div>
+        <section class="card">
+          <div class="card-header-row">
+            <h2 class="card-title-serif">Your bols, recognized</h2>
+            <span class="eval-card-badge">Normalized tokens</span>
+          </div>
+          <div class="bol-count-line" id="bolCount"></div>
           <div class="bol-tokens" id="bolTokens"></div>
-          <div class="card-title" style="margin-top:14px;">Raw ASR Transcript</div>
+          <p class="eyebrow" style="margin-top:6px;">Raw ASR transcript</p>
           <div class="transcript-box" id="transcript"></div>
-        </div>
+        </section>
 
         <!-- Feedback -->
-        <div class="section-hdr">📋 Guru Diagnostics &amp; Critique</div>
-        <div class="feedback-list" id="feedbackList"></div>
+        <section class="card">
+          <div class="card-header-row">
+            <h2 class="card-title-serif">Guru diagnostics &amp; critique</h2>
+            <span class="eval-card-badge">For your next riyaaz</span>
+          </div>
+          <div class="feedback-list" id="feedbackList"></div>
+        </section>
 
-        <!-- Swipeable Visual Diagnostics Carousel -->
-        <div class="section-hdr">📊 Visual Diagnostics (Swipeable)</div>
-        <div class="carousel-container">
+        <!-- Plots Carousel -->
+        <section class="card">
+          <div class="card-header-row">
+            <h2 class="card-title-serif">Visual diagnostics</h2>
+            <span class="eval-card-badge">Swipe to explore</span>
+          </div>
           <div class="carousel-track-wrapper" id="carouselTrack">
-            <!-- Slide 1 -->
             <div class="carousel-slide" data-index="0">
-              <div class="slide-title"><span>Mel Spectrogram &amp; MFCCs</span><span>1 / 4</span></div>
+              <div class="slide-title"><span>Mel spectrogram &amp; MFCCs</span><span>1 / 4</span></div>
               <img id="plotFeatures" class="plot-img" alt="Mel Spectrogram & MFCCs" />
             </div>
-            <!-- Slide 2 -->
             <div class="carousel-slide" data-index="1">
-              <div class="slide-title"><span>Teental Grid Alignment</span><span>2 / 4</span></div>
-              <img id="plotTala" class="plot-img" alt="Teental Grid Alignment" />
+              <div class="slide-title"><span>Tala grid alignment</span><span>2 / 4</span></div>
+              <img id="plotTala" class="plot-img" alt="Tala Grid Alignment" />
             </div>
-            <!-- Slide 3 -->
             <div class="carousel-slide" data-index="2">
-              <div class="slide-title"><span>Bol Recognition Timeline</span><span>3 / 4</span></div>
+              <div class="slide-title"><span>Bol recognition timeline</span><span>3 / 4</span></div>
               <img id="plotBols" class="plot-img" alt="Bol Recognition Timeline" />
             </div>
-            <!-- Slide 4 -->
             <div class="carousel-slide" data-index="3">
-              <div class="slide-title"><span>Performance Report Card</span><span>4 / 4</span></div>
+              <div class="slide-title"><span>Performance report card</span><span>4 / 4</span></div>
               <img id="plotReport" class="plot-img" alt="Performance Report Card" />
             </div>
           </div>
-
-          <!-- Carousel Controls -->
           <div class="carousel-nav">
             <button class="carousel-btn" id="prevSlideBtn">← Previous</button>
             <div class="carousel-dots" id="carouselDots">
@@ -2025,17 +1001,32 @@
             </div>
             <button class="carousel-btn" id="nextSlideBtn">Next →</button>
           </div>
+        </section>
+
+        <div class="evaluation-end">
+          <p class="proc-time" id="procTime"></p>
+          <button class="practice-again-btn" id="practiceAgainBtn">
+            <span>Begin another practice</span>
+            <svg viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg>
+          </button>
         </div>
 
-        <p class="proc-time" id="procTime"></p>
-
       </div><!-- /resultsContent -->
-
     </div><!-- /resultsScreen -->
 
-  </main>
+  </div>
 
   <script>
+    // ── Textile border (generated) ──────────────────────────────────────────────
+    (function buildTextile() {
+      const g = document.getElementById('textile-g');
+      let s = '';
+      for (let x = 14; x < 1120; x += 28) {
+        s += `<path d="M${x} 3l7 7-7 7-7-7z"/><circle cx="${x}" cy="10" r="2"/>`;
+      }
+      g.insertAdjacentHTML('beforeend', s);
+    })();
+
     // ── Classical Tala Dictionaries & Shastra Rubrics ───────────────────────────
     const TALA_DICTIONARY = {
       Teental: {
@@ -2170,24 +1161,22 @@
     let totalCycleMatras = 16;
 
     const PILLAR_META = [
-      { key: 'laya_stability', label: 'Laya Sthirata', sub: 'Tempo Stability', color: '#166534' },
-      { key: 'sam_precision', label: 'Sam Precision', sub: 'Beat 1 Accuracy', color: '#b45309' },
-      { key: 'matra_synchrony', label: 'Matra Synchrony', sub: 'Rhythmic Jitter', color: '#78350f' },
-      { key: 'bol_accuracy', label: 'Bol Shuddhata', sub: 'Syllable Accuracy', color: '#9a3412' },
+      { key: 'laya_stability', label: 'Laya Sthirata', sub: 'Tempo Stability', color: '#535b35' },
+      { key: 'sam_precision', label: 'Sam Precision', sub: 'Beat 1 Accuracy', color: '#b07a1a' },
+      { key: 'matra_synchrony', label: 'Matra Synchrony', sub: 'Rhythmic Jitter', color: '#422c21' },
+      { key: 'bol_accuracy', label: 'Bol Shuddhata', sub: 'Syllable Accuracy', color: '#963e31' },
     ];
 
-    const FEEDBACK_ICONS = {
-      EXCELLENT: '✅', INFO: 'ℹ️', WARNING: '⚠️', CRITICAL: '🚨'
-    };
+    const FEEDBACK_ICONS = { EXCELLENT: '✅', INFO: 'ℹ️', WARNING: '⚠️', CRITICAL: '🚨' };
 
-    // ── Screen Switching Helper ──────────────────────────────────────────────────
+    // ── Screen Switching ────────────────────────────────────────────────────────
     function switchScreen(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(screenId).classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ── Refs ─────────────────────────────────────────────────────────────────────
+    // ── Refs ────────────────────────────────────────────────────────────────────
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const selectedFile = document.getElementById('selectedFile');
@@ -2195,24 +1184,27 @@
     const loader = document.getElementById('loader');
     const resultsContent = document.getElementById('resultsContent');
     const backBtn = document.getElementById('backBtn');
+    const practiceAgainBtn = document.getElementById('practiceAgainBtn');
 
     let selectedFileObj = null;
 
-    // ── Back Button Handler ──────────────────────────────────────────────────────
-    backBtn.addEventListener('click', () => {
-      // Stop playback if running
+    function goHome() {
       if (playbackAudio) {
         playbackAudio.pause();
         playbackAudio = null;
       }
       if (playbackRAF) cancelAnimationFrame(playbackRAF);
+      setPlayIcon(false);
       switchScreen('homeScreen');
-    });
+    }
+    backBtn.addEventListener('click', goHome);
+    practiceAgainBtn.addEventListener('click', goHome);
 
-    // ══════════════════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
     // AUDIO RECORDING
-    // ══════════════════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
     const recordBtn = document.getElementById('recordBtn');
+    const recordIcon = document.getElementById('recordIcon');
     const recordLabel = document.getElementById('recordLabel');
     const recordTimer = document.getElementById('recordTimer');
     const recordWaveform = document.getElementById('recordWaveform');
@@ -2229,11 +1221,15 @@
     let analyserNode = null;
     let waveformCtx = recordWaveform.getContext('2d');
 
+    function setRecordIcon(recording) {
+      recordIcon.innerHTML = recording ? '<use href="#icon-stop"></use>' : '<use href="#icon-mic"></use>';
+    }
+
     recordBtn.addEventListener('click', async () => {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
-        // Stop recording
         mediaRecorder.stop();
         recordBtn.classList.remove('recording');
+        setRecordIcon(false);
         recordLabel.textContent = 'Recording complete!';
         clearInterval(recordingInterval);
         recordTimer.classList.remove('visible');
@@ -2246,7 +1242,6 @@
         audioChunks = [];
         mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
 
-        // Waveform visualization
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioContext.createMediaStreamSource(stream);
         analyserNode = audioContext.createAnalyser();
@@ -2263,19 +1258,19 @@
           const url = URL.createObjectURL(blob);
           recordedAudio.src = url;
           recordPreview.classList.add('visible');
-
-          // Store blob for upload
           recordBtn._recordedBlob = blob;
         };
 
         mediaRecorder.start(250);
         recordBtn.classList.add('recording');
+        setRecordIcon(true);
         recordLabel.textContent = 'Recording… Tap to stop';
         recordingStartTime = Date.now();
+        recordTimer.textContent = '00:00';
         recordTimer.classList.add('visible');
         recordWaveform.classList.add('visible');
+        recordPreview.classList.remove('visible');
 
-        // Timer update
         recordingInterval = setInterval(() => {
           const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
           const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
@@ -2283,7 +1278,6 @@
           recordTimer.textContent = `${mins}:${secs}`;
         }, 500);
 
-        // Draw waveform
         drawRecordingWaveform();
 
       } catch (err) {
@@ -2303,7 +1297,7 @@
       const h = canvas.height = canvas.offsetHeight * 2;
       waveformCtx.clearRect(0, 0, w, h);
       waveformCtx.lineWidth = 2;
-      waveformCtx.strokeStyle = '#991b1b';
+      waveformCtx.strokeStyle = '#963e31';
       waveformCtx.beginPath();
 
       const sliceW = w / bufLen;
@@ -2335,14 +1329,14 @@
       recordLabel.textContent = '✅ Recording ready for analysis!';
     });
 
-    // ── Library ───────────────────────────────────────────────────────────────────
+    // ── Library ─────────────────────────────────────────────────────────────────
     async function loadLibrary() {
       try {
         const r = await fetch('/library');
         const data = await r.json();
         const list = document.getElementById('libraryList');
         if (!data.recordings.length) {
-          list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;">No recordings found in data/raw/</div>';
+          list.innerHTML = '<div class="library-empty">No recordings found in data/raw/</div>';
           return;
         }
         list.innerHTML = '';
@@ -2350,12 +1344,15 @@
           const item = document.createElement('div');
           item.className = 'library-item';
           item.innerHTML = `
-        <div>
-          <div class="name">🎵 ${rec.filename}</div>
-          <div class="size">${rec.size_kb} KB</div>
-        </div>
-        <audio controls src="${rec.url}"></audio>
-      `;
+            <div class="library-item-top">
+              <svg viewBox="0 0 24 24"><use href="#icon-waveform"></use></svg>
+              <div>
+                <div class="name">${rec.filename}</div>
+                <div class="size">${rec.size_kb} KB</div>
+              </div>
+            </div>
+            <audio controls src="${rec.url}"></audio>
+          `;
           item.querySelector('.name').addEventListener('click', () => loadLibraryFile(rec.filename));
           list.appendChild(item);
         });
@@ -2372,7 +1369,9 @@
       analyzeBtn.disabled = false;
     }
 
-    // ── File Input ────────────────────────────────────────────────────────────────
+    // ── File Input ──────────────────────────────────────────────────────────────
+    dropZone.addEventListener('click', () => fileInput.click());
+
     fileInput.addEventListener('change', e => {
       const f = e.target.files[0];
       if (f) {
@@ -2391,7 +1390,7 @@
       if (f) { selectedFileObj = f; selectedFile.textContent = `Selected: ${f.name}`; analyzeBtn.disabled = false; }
     });
 
-    // ── Loader animation ──────────────────────────────────────────────────────────
+    // ── Loader stages ───────────────────────────────────────────────────────────
     function setStage(idx) {
       ['s1', 's2', 's3', 's4'].forEach((id, i) => {
         const el = document.getElementById(id);
@@ -2401,7 +1400,7 @@
       });
     }
 
-    // ── Carousel Logic ────────────────────────────────────────────────────────────
+    // ── Carousel ────────────────────────────────────────────────────────────────
     const track = document.getElementById('carouselTrack');
     const slides = document.querySelectorAll('.carousel-slide');
     const dots = document.querySelectorAll('.carousel-dot');
@@ -2415,18 +1414,12 @@
       currentSlide = Math.max(0, Math.min(idx, totalSlides - 1));
       const slideWidth = slides[0].offsetWidth + 16;
       track.scrollTo({ left: currentSlide * slideWidth, behavior: 'smooth' });
-
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === currentSlide);
-      });
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
     }
 
     prevBtn.addEventListener('click', () => updateCarousel(currentSlide - 1));
     nextBtn.addEventListener('click', () => updateCarousel(currentSlide + 1));
-
-    dots.forEach((dot, i) => {
-      dot.addEventListener('click', () => updateCarousel(i));
-    });
+    dots.forEach((dot, i) => dot.addEventListener('click', () => updateCarousel(i)));
 
     track.addEventListener('scroll', () => {
       const slideWidth = slides[0].offsetWidth + 16;
@@ -2437,9 +1430,9 @@
       }
     });
 
-    // ══════════════════════════════════════════════════════════════════════════════
-    // AUDIO PLAYBACK + INTERACTIVE BOL SLIDER WITH TIME + KATHAK NOTATION SYNC
-    // ══════════════════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
+    // AUDIO PLAYBACK + INTERACTIVE BOL SLIDER + KATHAK NOTATION SYNC
+    // ══════════════════════════════════════════════════════════════════════════
     let playbackAudio = null;
     let playbackRAF = null;
     let cachedAlignments = [];
@@ -2451,6 +1444,7 @@
     let cycleBoundaries = [];
 
     const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
     const sliderTrack = document.getElementById('sliderTrack');
     const sliderFill = document.getElementById('sliderFill');
     const sliderLine = document.getElementById('sliderLine');
@@ -2463,6 +1457,10 @@
     const cycleSwitcherWrap = document.getElementById('cycleSwitcherWrap');
     const cyclePillsList = document.getElementById('cyclePillsList');
 
+    function setPlayIcon(playing) {
+      playIcon.innerHTML = playing ? '<use href="#icon-pause"></use>' : '<use href="#icon-play"></use>';
+    }
+
     function formatFineTime(sec) {
       if (isNaN(sec) || sec < 0) sec = 0;
       const m = Math.floor(sec / 60);
@@ -2470,15 +1468,12 @@
       return `${m}:${s.padStart(4, '0')}`;
     }
 
-    // Speed selector
     document.querySelectorAll('.speed-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentPlaybackRate = parseFloat(btn.dataset.speed) || 1.0;
-        if (playbackAudio) {
-          playbackAudio.playbackRate = currentPlaybackRate;
-        }
+        if (playbackAudio) playbackAudio.playbackRate = currentPlaybackRate;
       });
     });
 
@@ -2502,12 +1497,10 @@
         }
       }
 
-      // Calculate total avartans / cycles
       totalAvartans = 1;
       cachedAlignments.forEach(a => { if (a.cycle > totalAvartans) totalAvartans = a.cycle; });
       cachedExpectedGrid.forEach(e => { if (e.cycle > totalAvartans) totalAvartans = e.cycle; });
 
-      // Compute time boundaries for each cycle using totalCycleMatras
       cycleBoundaries = [];
       const matraDur = (talaData && talaData.tempo_bpm) ? (60.0 / talaData.tempo_bpm) : 0.5;
       for (let c = 1; c <= totalAvartans; c++) {
@@ -2531,13 +1524,14 @@
         playbackAudio = null;
       }
       if (playbackRAF) cancelAnimationFrame(playbackRAF);
+      setPlayIcon(false);
 
       playbackAudio = new Audio(audioUrl);
       playbackAudio.preload = 'auto';
       playbackAudio.playbackRate = currentPlaybackRate;
 
       playbackAudio.addEventListener('loadedmetadata', () => {
-        if (playbackAudio.duration && !isNaN(playbackAudio.duration)) {
+        if (playbackAudio.duration && !isNaN(playbackAudio.duration) && isFinite(playbackAudio.duration)) {
           audioDuration = playbackAudio.duration;
           if (cycleBoundaries.length > 0) {
             cycleBoundaries[cycleBoundaries.length - 1].end = audioDuration;
@@ -2550,7 +1544,7 @@
       });
 
       playbackAudio.addEventListener('ended', () => {
-        playBtn.textContent = '▶';
+        setPlayIcon(false);
         cancelAnimationFrame(playbackRAF);
       });
 
@@ -2571,10 +1565,8 @@
           const btn = document.createElement('button');
           btn.className = `cycle-pill-btn ${c === currentActiveCycle ? 'active' : ''}`;
           btn.dataset.cycle = c;
-          btn.innerHTML = `🔄 आवर्तन ${c} <span style="font-size:0.7rem;opacity:0.85;">(मात्रा ${startM}–${endM})</span>`;
-          btn.addEventListener('click', () => {
-            selectCycle(c, true);
-          });
+          btn.innerHTML = `आवर्तन ${c} <span style="font-size:0.85em;opacity:0.8;font-weight:500;">(मात्रा ${startM}–${endM})</span>`;
+          btn.addEventListener('click', () => selectCycle(c, true));
           cyclePillsList.appendChild(btn);
         }
       } else {
@@ -2584,11 +1576,9 @@
 
     function selectCycle(cycleNum, shouldSeek) {
       currentActiveCycle = cycleNum;
-      // Update pills
       document.querySelectorAll('.cycle-pill-btn').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.cycle, 10) === currentActiveCycle);
       });
-      // Re-render strikes on the single slider
       renderSliderStrikes(currentActiveCycle);
 
       if (shouldSeek && playbackAudio) {
@@ -2600,22 +1590,16 @@
       }
     }
 
-    // ── STRICTLY ONE CANONICAL SLIDER FOR ACTIVE TALA ──
+    // ── One canonical slider for the active Tala ──
     function renderSliderMarkers() {
       if (!sliderMarkersContainer) return;
       sliderMarkersContainer.innerHTML = '';
 
-      // Update Slider Track Legend Header with active Tala specification
       const sLeft = document.getElementById('sliderLegendLeft');
       const sRight = document.getElementById('sliderLegendRight');
-      if (sLeft) {
-        sLeft.textContent = `◀ Canonical ${totalCycleMatras}-Matra ${activeTalaMeta.name} Bol Grid (The Correct Time)`;
-      }
-      if (sRight) {
-        sRight.textContent = `Your Strike Onsets (Early / Late Timing Error) ▶`;
-      }
+      if (sLeft) sLeft.textContent = `◀ Canonical ${totalCycleMatras}-Matra ${activeTalaMeta.name} Bol Grid (The Correct Time)`;
+      if (sRight) sRight.textContent = `Your Strike Onsets (Early / Late Timing Error) ▶`;
 
-      // Vibhag divider partition lines based on active Tala's vibhag boundaries
       let cumulative = 0;
       const vibhags = activeTalaMeta.vibhags || [4, 4, 4, 4];
       for (let i = 0; i < vibhags.length - 1; i++) {
@@ -2628,7 +1612,6 @@
         sliderMarkersContainer.appendChild(divLine);
       }
 
-      // Render EXACTLY the Canonical Matras for the active Tala (e.g. Jhaptaal 10 bols)
       const matrasList = activeTalaMeta.matrasMeta;
       matrasList.forEach(m => {
         const pct = ((m.matra - 0.5) / totalCycleMatras) * 100;
@@ -2640,7 +1623,6 @@
         marker.style.left = `${pct}%`;
         marker.dataset.matra = m.matra;
 
-        // Clean classical sign suffixes: only on boundary matras
         let signSuffix = '';
         if (m.matra === 1) {
           signSuffix = ' (X)';
@@ -2664,6 +1646,7 @@
         `;
         marker.title = `मात्रा ${m.matra}: ${m.devanagari} (${m.bol}) — ${m.action}`;
 
+        marker.addEventListener('mousedown', e => e.stopPropagation());
         marker.addEventListener('click', (e) => {
           e.stopPropagation();
           seekToMatraInCurrentCycle(m.matra);
@@ -2673,7 +1656,6 @@
       });
     }
 
-    // Strike Pins for Current Active Cycle ONLY
     function renderSliderStrikes(cycleNum) {
       if (!sliderStrikesContainer) return;
       sliderStrikesContainer.innerHTML = '';
@@ -2708,9 +1690,7 @@
     function seekToMatraInCurrentCycle(matraNum) {
       const target = cachedExpectedGrid.find(e => e.cycle === currentActiveCycle && e.matra === matraNum)
         || cachedAlignments.find(a => a.cycle === currentActiveCycle && a.matra === matraNum);
-      if (target) {
-        seekToTime(target.target_time);
-      }
+      if (target) seekToTime(target.target_time);
     }
 
     function seekToTime(targetSec) {
@@ -2718,7 +1698,7 @@
       playbackAudio.currentTime = Math.max(0, Math.min(targetSec, audioDuration));
       if (playbackAudio.paused) {
         playbackAudio.play();
-        playBtn.textContent = '⏸';
+        setPlayIcon(true);
       }
       updatePlaybackUI();
     }
@@ -2727,46 +1707,36 @@
       if (!playbackAudio) return;
       if (playbackAudio.paused) {
         playbackAudio.play();
-        playBtn.textContent = '⏸';
+        setPlayIcon(true);
         updatePlaybackUI();
       } else {
         playbackAudio.pause();
-        playBtn.textContent = '▶';
+        setPlayIcon(false);
         cancelAnimationFrame(playbackRAF);
       }
     });
 
-    // Slider scrubbing: scrubs within current active cycle
+    // Slider scrubbing within the current active cycle
     let isDraggingSlider = false;
     function handleSliderScrub(e) {
       if (!playbackAudio || audioDuration <= 0) return;
       const rect = sliderTrack.getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-
       const b = cycleBoundaries.find(cb => cb.cycle === currentActiveCycle) || { start: 0, end: audioDuration };
       playbackAudio.currentTime = b.start + pct * (b.end - b.start);
       updatePlaybackUI();
     }
 
-    sliderTrack.addEventListener('mousedown', (e) => {
-      isDraggingSlider = true;
-      handleSliderScrub(e);
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (isDraggingSlider) handleSliderScrub(e);
-    });
-
-    window.addEventListener('mouseup', () => {
-      isDraggingSlider = false;
-    });
+    sliderTrack.addEventListener('mousedown', (e) => { isDraggingSlider = true; handleSliderScrub(e); });
+    window.addEventListener('mousemove', (e) => { if (isDraggingSlider) handleSliderScrub(e); });
+    window.addEventListener('mouseup', () => { isDraggingSlider = false; });
 
     function updatePlaybackUI() {
       if (!playbackAudio) return;
       const current = playbackAudio.currentTime;
       playbackTime.textContent = `${formatFineTime(current)} / ${formatFineTime(audioDuration)}`;
 
-      // 1. Detect active matra across all beats
+      // 1. Active matra across all beats
       let activeMatra = null;
       let minDelta = Infinity;
       const candidates = cachedAlignments.length ? cachedAlignments : cachedExpectedGrid;
@@ -2778,12 +1748,12 @@
         }
       });
 
-      // 2. Auto-sync cycle if playback crossed into next cycle
+      // 2. Auto-sync cycle
       if (activeMatra && activeMatra.cycle !== currentActiveCycle) {
         selectCycle(activeMatra.cycle, false);
       }
 
-      // 3. Update single slider progress needle
+      // 3. Slider needle
       const b = cycleBoundaries.find(cb => cb.cycle === currentActiveCycle) || { start: 0, end: audioDuration };
       const cycleSpan = Math.max(0.1, b.end - b.start);
       const cyclePct = Math.max(0, Math.min(100, ((current - b.start) / cycleSpan) * 100));
@@ -2792,32 +1762,22 @@
       sliderLine.style.left = `${cyclePct}%`;
       sliderThumb.style.left = `${cyclePct}%`;
 
-      // 4. Highlight the SINGLE active marker on the slider
+      // 4. Active marker
       const activeMatraNum = activeMatra ? activeMatra.matra : null;
-      const markers = sliderMarkersContainer.querySelectorAll('.canonical-bol-marker');
-      markers.forEach(m => {
-        if (activeMatraNum !== null && parseInt(m.dataset.matra, 10) === activeMatraNum) {
-          m.classList.add('active');
-        } else {
-          m.classList.remove('active');
-        }
+      sliderMarkersContainer.querySelectorAll('.canonical-bol-marker').forEach(m => {
+        m.classList.toggle('active', activeMatraNum !== null && parseInt(m.dataset.matra, 10) === activeMatraNum);
       });
 
-      // 5. Highlight the SINGLE active cell in the Analysis Rows below (continuous counter)
+      // 5. Active notation cell (continuous counter)
       const activeGlobalMatra = activeMatra
         ? (activeMatra.global_matra || ((activeMatra.cycle - 1) * totalCycleMatras + activeMatra.matra))
         : null;
 
-      const cells = document.querySelectorAll('.kathak-matra-cell');
-      cells.forEach(c => {
-        if (activeGlobalMatra !== null && parseInt(c.dataset.globalMatra, 10) === activeGlobalMatra) {
-          c.classList.add('active-matra');
-        } else {
-          c.classList.remove('active-matra');
-        }
+      document.querySelectorAll('.kathak-matra-cell').forEach(c => {
+        c.classList.toggle('active-matra', activeGlobalMatra !== null && parseInt(c.dataset.globalMatra, 10) === activeGlobalMatra);
       });
 
-      // 6. Update Live Inspector Banner
+      // 6. Live inspector
       if (activeMatra) {
         const meta = activeTalaMeta.matrasMeta[activeMatra.matra - 1] || {};
         const cycleText = activeMatra.cycle > 1 ? ` • आवर्तन ${activeMatra.cycle}` : '';
@@ -2863,11 +1823,10 @@
       }
     }
 
-    // ── Analyze ───────────────────────────────────────────────────────────────────
+    // ── Analyze ─────────────────────────────────────────────────────────────────
     analyzeBtn.addEventListener('click', async () => {
       if (!selectedFileObj) return;
 
-      switchScreen('resultsScreen');
       loader.classList.add('visible');
       resultsContent.style.display = 'none';
       document.getElementById('currentFilenameBadge').textContent = `File: ${selectedFileObj.name}`;
@@ -2895,23 +1854,24 @@
         }
 
         const data = await res.json();
-        loader.classList.remove('visible');
+        switchScreen('resultsScreen');
+        resultsContent.style.display = 'flex';
         renderResults(data);
-        resultsContent.style.display = 'block';
+        loader.classList.remove('visible');
       } catch (e) {
+        stageTimers.forEach(clearTimeout);
         loader.classList.remove('visible');
         alert('Error: ' + e.message);
         switchScreen('homeScreen');
       }
     });
 
-    // ── Render Results ─────────────────────────────────────────────────────────────
+    // ── Render Results ──────────────────────────────────────────────────────────
     function renderResults(d) {
       const sc = d.scorecard;
       const tal = d.tala;
       const bol = d.bols;
 
-      // Configure Active Tala with robust matching
       const rawName = tal && tal.name ? tal.name : 'Teental';
       const cleanKey = Object.keys(TALA_DICTIONARY).find(k =>
         k.toLowerCase() === rawName.toLowerCase() ||
@@ -2924,42 +1884,24 @@
       activeTalaMeta = TALA_DICTIONARY[cleanKey];
       totalCycleMatras = (tal && tal.total_matras) ? tal.total_matras : activeTalaMeta.matras;
 
+      // Grade banner
       document.getElementById('gradeTitle').textContent = sc.title_award;
       document.getElementById('gradeSubtitle').textContent = `${d.filename} · ${d.audio.duration_sec}s · ${tal.tempo_bpm} BPM (${tal.laya_category})`;
       document.getElementById('gradeLetter').textContent = sc.letter_grade;
       document.getElementById('gradeScore').textContent = `${sc.composite_score}%`;
-      document.getElementById('gradeCircle').style.setProperty('--pct', sc.composite_score);
 
-      // Active / Detected Tala Banner
-      const detTitle = document.getElementById('detectedTalaTitle');
-      const detSub = document.getElementById('detectedTalaSub');
-      const detBadge = document.getElementById('detectedTalaBadge');
-      if (detTitle && detSub && detBadge) {
-        detTitle.textContent = `${tal.display_name || activeTalaMeta.display} • संरचना: ${tal.structure || activeTalaMeta.structure}`;
-        detSub.textContent = `पहचाना गया ताल (Tala Match: ${tal.confidence || 95}%) • ${totalCycleMatras} मात्रा, ${tal.vibhags ? tal.vibhags.length : activeTalaMeta.vibhags.length} विभाग (${(tal.vibhags || activeTalaMeta.vibhags).join('+')})`;
-        detBadge.textContent = `✨ ${activeTalaMeta.name} Active`;
-      }
+      // Detected tala banner
+      document.getElementById('detectedTalaTitle').textContent = `${tal.display_name || activeTalaMeta.display} • संरचना: ${tal.structure || activeTalaMeta.structure}`;
+      document.getElementById('detectedTalaSub').textContent = `पहचाना गया ताल (Tala Match: ${tal.confidence || 95}%) • ${totalCycleMatras} मात्रा, ${tal.vibhags ? tal.vibhags.length : activeTalaMeta.vibhags.length} विभाग (${(tal.vibhags || activeTalaMeta.vibhags).join('+')})`;
+      document.getElementById('detectedTalaBadge').textContent = `✨ ${activeTalaMeta.name} Active`;
 
-      // Slider Legend & Shastra Banner
-      const sLeft = document.getElementById('sliderLegendLeft');
-      const sRight = document.getElementById('sliderLegendRight');
-      if (sLeft) {
-        sLeft.textContent = `◀ Canonical ${totalCycleMatras}-Matra ${activeTalaMeta.name} Bol Grid (The Correct Time)`;
-      }
-      if (sRight) {
-        sRight.textContent = `Your Strike Onsets (Early / Late Timing Error) ▶`;
-      }
-
-      const shTitle = document.getElementById('shastraTitleText');
-      if (shTitle) {
-        shTitle.textContent = activeTalaMeta.shastraTitle;
-      }
-      const shRules = document.getElementById('shastraRules');
-      if (shRules) {
-        shRules.innerHTML = activeTalaMeta.rules.map(r =>
-          `<span class="rule-chip ${r.cls}">${r.text}</span>`
-        ).join('');
-      }
+      // Slider legend & shastra banner
+      document.getElementById('sliderLegendLeft').textContent = `◀ Canonical ${totalCycleMatras}-Matra ${activeTalaMeta.name} Bol Grid (The Correct Time)`;
+      document.getElementById('sliderLegendRight').textContent = `Your Strike Onsets (Early / Late Timing Error) ▶`;
+      document.getElementById('shastraTitleText').textContent = activeTalaMeta.shastraTitle;
+      document.getElementById('shastraRules').innerHTML = activeTalaMeta.rules.map(r =>
+        `<span class="rule-chip ${r.cls}">${r.text}</span>`
+      ).join('');
 
       // 4 Pillars
       const pg = document.getElementById('pillarsGrid');
@@ -2967,17 +1909,16 @@
       PILLAR_META.forEach(m => {
         const val = sc.pillars[m.key] ?? 0;
         pg.innerHTML += `
-      <div class="pillar-card">
-        <div class="pillar-label">${m.label}</div>
-        <div class="pillar-val" style="color:${m.color}">${val}%</div>
-        <div style="font-size:.7rem;color:var(--muted)">${m.sub}</div>
-        <div class="pillar-bar"><div class="pillar-fill" style="width:${val}%;background:${m.color}"></div></div>
-      </div>`;
+          <div class="pillar-card">
+            <span class="pillar-label">${m.label}</span>
+            <span class="pillar-value" style="color:${m.color}">${val}%</span>
+            <div class="pillar-track"><div class="pillar-progress" style="width:${val}%;background:${m.color}"></div></div>
+            <span class="pillar-detail">${m.sub}</span>
+          </div>`;
       });
 
       // Tala chips
-      const chips = document.getElementById('talaChips');
-      chips.innerHTML = [
+      document.getElementById('talaChips').innerHTML = [
         ['Taal', tal.display_name || activeTalaMeta.display],
         ['Tempo', `${tal.tempo_bpm} BPM`],
         ['Laya', tal.laya_category],
@@ -2985,21 +1926,19 @@
         ['Mean Error', `${tal.mean_abs_error_ms} ms`],
         ['Jitter', `${tal.timing_jitter_ms} ms`],
         tal.sam_offset_ms !== null ? ['Sam Offset', `${tal.sam_offset_ms > 0 ? '+' : ''}${tal.sam_offset_ms} ms`] : null,
-      ].filter(Boolean).map(([l, v]) => `<div class="tala-chip"><span style="color:var(--muted);font-size:.7rem">${l}: </span><strong>${v}</strong></div>`).join('');
+      ].filter(Boolean).map(([l, v]) => `<div class="tala-chip"><span class="chip-lbl">${l}</span><strong>${v}</strong></div>`).join('');
 
-      // ── Authentic Kathak Vibhag Visualization (भातखंडे ताल लिपि) ──
-      const container = document.getElementById('vibhagsContainer') || document.getElementById('vibhagsGrid');
+      // ── Bhatkhande vibhag notation ──
+      const container = document.getElementById('vibhagsContainer');
       container.innerHTML = '';
 
       const allAlignments = tal.grid_alignments || [];
       const allExpected = tal.expected_grid || [];
 
-      // Determine total number of cycles (Avartans)
       let maxCycle = tal.total_cycles || 1;
       allAlignments.forEach(a => { if (a.cycle > maxCycle) maxCycle = a.cycle; });
       allExpected.forEach(e => { if (e.cycle > maxCycle) maxCycle = e.cycle; });
 
-      // Build lookup maps keyed by unique global_matra
       const alignMapByGlobal = {};
       allAlignments.forEach(a => {
         const g = a.global_matra || ((a.cycle - 1) * totalCycleMatras + a.matra);
@@ -3019,7 +1958,6 @@
         const avartanBlock = document.createElement('div');
         avartanBlock.className = 'avartan-block';
 
-        // Avartan Cycle Header
         const firstBeat = expectedMapByGlobal[startMatra] || alignMapByGlobal[startMatra];
         const timeNote = firstBeat ? ` • Start: ${firstBeat.target_time.toFixed(2)}s` : '';
 
@@ -3027,16 +1965,13 @@
         avartanHdr.className = 'avartan-hdr';
         avartanHdr.innerHTML = `
           <div class="avartan-hdr-left">
-            <span class="avartan-badge">🔄 आवर्तन ${c} (Cycle ${c})</span>
+            <span class="avartan-badge">आवर्तन ${c} (Cycle ${c})</span>
             <span class="avartan-range">मात्रा ${startMatra} – ${endMatra} (Beats ${startMatra}–${endMatra})</span>
           </div>
-          <div class="avartan-hdr-right">
-            <span>${totalCycleMatras} मात्रा ${activeTalaMeta.display} चक्र${timeNote}</span>
-          </div>
+          <div class="avartan-hdr-right">${totalCycleMatras} मात्रा ${activeTalaMeta.display} चक्र${timeNote}</div>
         `;
         avartanBlock.appendChild(avartanHdr);
 
-        // Vibhags Grid for this cycle (columns strictly match number of vibhags in this Tala)
         const vibhagsGrid = document.createElement('div');
         vibhagsGrid.className = 'vibhags-grid';
         vibhagsGrid.style.gridTemplateColumns = `repeat(${activeTalaMeta.vibhagDefs.length}, 1fr)`;
@@ -3045,7 +1980,6 @@
           const card = document.createElement('div');
           card.className = `vibhag-card ${v.cls}-vibhag`;
 
-          // Vibhag Header
           const hdr = document.createElement('div');
           hdr.className = 'vibhag-card-hdr';
           hdr.innerHTML = `
@@ -3057,7 +1991,6 @@
           `;
           card.appendChild(hdr);
 
-          // Cells container
           const cellsDiv = document.createElement('div');
           cellsDiv.className = 'vibhag-cells-container';
 
@@ -3078,9 +2011,9 @@
               ? `Click to listen to Matra ${globalMatra} (Cycle ${c}, Beat ${m}): ${meta.devanagari || ''} (${meta.bol || ''}) @ ${targetTime.toFixed(2)}s`
               : `Matra ${globalMatra} (${meta.bol || ''}): Audio ended before this beat`;
 
-            let diagBadgeHTML = `<div class="diag-pill" style="color:var(--muted)">मात्रा समय</div>`;
+            let diagBadgeHTML = `<div class="diag-pill">मात्रा समय</div>`;
             if (isPastAudio) {
-              diagBadgeHTML = `<div class="diag-pill" style="color:var(--muted);opacity:0.5">—</div>`;
+              diagBadgeHTML = `<div class="diag-pill" style="opacity:0.5">—</div>`;
             } else if (a) {
               if (a.status === 'ON_BEAT') {
                 const offStr = a.offset_ms !== null ? (a.offset_ms > 0 ? '+' : '') + Math.round(a.offset_ms) + 'ms' : '0ms';
@@ -3108,11 +2041,8 @@
               </div>
             `;
 
-            // Clicking seeks playback to this exact matra
             if (!isPastAudio && targetTime !== null && targetTime !== undefined) {
-              cell.addEventListener('click', () => {
-                seekToTime(targetTime);
-              });
+              cell.addEventListener('click', () => seekToTime(targetTime));
             }
 
             cellsDiv.appendChild(cell);
@@ -3126,7 +2056,7 @@
         container.appendChild(avartanBlock);
       }
 
-      // ── Audio Playback Init (Local ObjectURL or Remote Playback URL) ──
+      // ── Audio playback init ──
       let audioSrc = d.audio.playback_url;
       if (selectedFileObj) {
         try {
@@ -3156,17 +2086,17 @@
       fl.innerHTML = '';
       sc.feedback.forEach(f => {
         fl.innerHTML += `
-      <div class="feedback-item ${f.severity}">
-        <span class="feedback-icon">${FEEDBACK_ICONS[f.severity] || '•'}</span>
-        <div>
-          <div class="feedback-cat">${f.category}</div>
-          <div>${f.message}</div>
-        </div>
-      </div>`;
+          <div class="feedback-item ${f.severity}">
+            <span class="feedback-icon">${FEEDBACK_ICONS[f.severity] || '•'}</span>
+            <div>
+              <div class="feedback-cat">${f.category}</div>
+              <div>${f.message}</div>
+            </div>
+          </div>`;
       });
 
       // Plots
-      const plots = d.plots;
+      const plots = d.plots || {};
       if (plots.features) document.getElementById('plotFeatures').src = `data:image/png;base64,${plots.features}`;
       if (plots.tala) document.getElementById('plotTala').src = `data:image/png;base64,${plots.tala}`;
       if (plots.bols) document.getElementById('plotBols').src = `data:image/png;base64,${plots.bols}`;
@@ -3175,9 +2105,8 @@
       document.getElementById('procTime').textContent = `Analysis completed in ${d.processing_time_sec}s`;
     }
 
-    // ── Boot ──────────────────────────────────────────────────────────────────────
+    // ── Boot ────────────────────────────────────────────────────────────────────
     loadLibrary();
   </script>
 </body>
-
 </html>
