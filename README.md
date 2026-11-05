@@ -1,4 +1,4 @@
-# Kathak AI 🩰🥁
+# Kathak AI
 
 > **An AI-powered audio analysis, Tala rhythm tracking, and bol recognition engine for Indian Classical Dance (Kathak).**
 
@@ -6,7 +6,7 @@ Kathak AI bridges digital signal processing (DSP), Music Information Retrieval (
 
 ---
 
-## 🌟 Key Capabilities
+##  Key Capabilities
 
 1. **Spectral & Timbral Feature Engineering:**
    - 128-band Mel-Spectrograms (dB) capturing human pitch perception.
@@ -37,7 +37,7 @@ Kathak AI bridges digital signal processing (DSP), Music Information Retrieval (
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
                       Kathak Audio Recording (.wav)
@@ -58,7 +58,7 @@ Kathak AI bridges digital signal processing (DSP), Music Information Retrieval (
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 kathak-ai/
@@ -86,7 +86,7 @@ kathak-ai/
 
 ---
 
-## 🚀 Quickstart
+##  Quickstart
 
 ### 1. Prerequisites & Installation
 
@@ -136,7 +136,7 @@ python src/test_evaluator.py
 
 ---
 
-## 📊 Visual Diagnostics
+##  Visual Diagnostics
 
 The pipeline outputs high-resolution diagnostic plots to `outputs/`:
 - `features_<name>.png`: 4-panel spectral dashboard (Mel-Spectrogram, MFCCs, Centroid, ZCR).
@@ -145,7 +145,3 @@ The pipeline outputs high-resolution diagnostic plots to `outputs/`:
 - `report_<name>.png`: Executive performance scorecard with 4-pillar bar chart, grade badge, and diagnostic critique.
 
 ---
-
-## 📜 License
-
-MIT License. Developed for Indian Classical Dance AI research and pedagogy.
